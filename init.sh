@@ -28,7 +28,7 @@ sqlite3 booru.db <<EOF
 EOF
 
 if [ ! -f ".env" ]; then
-    cat > ".env" <<'EOF'
+    cat > ".env" <<EOF
 SESSION_KEY=""
 HOSTNAME=""
 PORT=0
