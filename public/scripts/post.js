@@ -234,6 +234,14 @@ fetch(`/api/src${window.location.search}`, {
         }
     });
 
+    const uploader = document.createElement("p");
+    uploader.innerHTML = `<br>uploader: ${data.uploader}`;
+    sidebar.appendChild(uploader);
+
+    const date = document.createElement("p");
+    date.innerHTML = `<br>date uploaded: ${new Date(data.date).toLocaleDateString()}`;
+    sidebar.appendChild(date);
+
     sidebar.appendChild(tag_head);
     sidebar.appendChild(tags);
 });
