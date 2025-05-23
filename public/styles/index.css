@@ -1,0 +1,170 @@
+* {
+    margin: 0;
+    font-family: "Gulim";
+}
+
+*:focus {
+    outline: none;
+}
+
+@font-face {
+    font-family: "Gulim";
+    src:
+        local("Gulim"),
+        local("Baekmuk Gulim"),
+        url("../assets/Gulim.ttf");
+}
+
+body {
+    height: 100vh;
+}
+
+#logo {
+    grid-area: 1 / 1 / 2 / 2;
+}
+
+#headname {
+    grid-area: 1 / 2 / 2 / 4;
+}
+
+#headname>h2 {
+    margin: 0;
+}
+
+#sign-wrapper {
+    grid-area: 1 / 6 / 2 / 8;
+    display: grid;
+    justify-items: right;
+}
+
+#parent {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: auto 1fr;
+    grid-gap: 0;
+    height: 100%;
+}
+
+#parent>div {
+    padding: 30px;
+}
+
+#sidebar {
+    grid-area: 2 / 1 / 5 / 2;
+    background-color: #EEF;
+}
+
+div#head-wrapper {
+    grid-area: 1 / 1 / 2 / 8;
+    width: inherit;
+    background-color: aliceblue;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: 1fr;
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+    margin: 0;
+    padding: 0;
+    height: 140px;
+}
+
+#posts {
+    grid-area: 2 / 2 / 5 / 8;
+}
+
+#head-wrapper>* {
+    margin: 20px;
+    height: 100px;
+}
+
+button,
+input[type=submit],
+::file-selector-button {
+    width: 100px;
+    background-color: #FEFFEC;
+    transition: 0.5s color;
+    height: 40px;
+}
+
+select {
+    background-color: #FFF;
+}
+
+button:hover,
+input[type=submit]:hover,
+::file-selector-button:hover {
+    cursor: pointer;
+    background-color: #ff78a9;
+    color: #FFF;
+}
+
+button,
+input:not([type=file]),
+::file-selector-button,
+select {
+    padding: 10px;
+    border: solid 1px #F39;
+}
+
+input:not([type=submit]) {
+    width: 200px;
+}
+
+#auth-status {
+    font-size: 12px;
+    margin: 6px;
+}
+
+#footer {
+    background-color: aliceblue;
+    grid-area: 5 / 1 / 6 / 8;
+}
+
+#posts {
+    display: flex;
+    flex-direction: row-reverse;
+    flex-wrap: wrap;
+    height: fit-content;
+    justify-content: left;
+}
+
+.post {
+    margin: 20px;
+    height: 150px;
+}
+
+.post>img {
+    padding: 5px;
+    border: solid 1px #BBC;
+    height: 150px;
+}
+
+::file-selector-button {
+    font-family: "Gulim";
+    margin-right: 15px;
+}
+
+#logo:hover,
+.post>img:hover {
+    cursor: pointer;
+}
+
+a {
+    text-decoration: none;
+}
+
+label {
+    margin-right: 10px;
+}
+
+#search-bar {
+    grid-area: 1 / 4 / 2 / 6;
+}
+
+#search-button {
+    width: 40px;
+}
+
+#sign-form > input {
+    width: 6vw;
+}

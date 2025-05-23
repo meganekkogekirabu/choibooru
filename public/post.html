@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>choibooru</title>
+        <link rel="stylesheet" type="text/css" href="styles/index.css">
+    </head>
+    <body>
+        <div id="parent">
+            <div id="head-wrapper">
+                <img id="logo" src="assets/logo.png">
+                <div id="headname">
+                    <h2>
+                        choibooru
+                        <small style="font-size: 12px;">(running choibooru 0.1)</small>
+                    </h2>
+                    <div id="signin-status"></div>
+                </div>
+                <div id="sign-wrapper">
+                    <form id="sign-form" style="display: none;">
+                        <label for="username">username:</label>
+                        <input type="text" name="username">
+                        <input type="submit" value="sign in" id="signin-button">
+                        <br><br>
+                        <label for="password">password:</label>
+                        <input type="password" name="password">
+                        <input type="submit" value="sign up" id="signup-button">
+                        <p id="auth-status"></p>
+                    </form>
+                </div>
+            </div>
+            <div id="sidebar"></div>
+            <div id="posts">
+                No posts yet!
+            </div>
+            <div id="footer">
+                choibooru v0.1 &mdash; 2025
+                <br>
+                <a href="https://github.com/meganekkogekirabu/choibooru">Source code</a>
+            </div>
+        </div>
+        <script src="scripts/post.js"></script>
+        <script src="scripts/auth.js"></script>
+    </body>
+</html>
