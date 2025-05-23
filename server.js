@@ -10,7 +10,7 @@ import "dotenv/config";
 import sharp from "sharp";
 import multer from "multer";
 
-const port = 3000;
+const port = process.argv[3] ?? 3000;
 const hostname = process.argv[2] ?? "127.0.0.1";
 
 const app = express();

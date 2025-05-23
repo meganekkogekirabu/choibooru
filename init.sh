@@ -1,5 +1,6 @@
 npm install
-mkdir -p public/assets
+mkdir -p public/assets/posts
+[ ! -f "public/assets/logo.png" ] && printf "\ncouldn't find logo, make sure you add one to public/assets/logo.png\n"
 
 sqlite3 booru.db <<EOF
     CREATE TABLE IF NOT EXISTS posts(
@@ -24,6 +25,6 @@ sqlite3 booru.db <<EOF
 .quit
 EOF
 
-echo ""
+printf "\n"
 
 node server.js
