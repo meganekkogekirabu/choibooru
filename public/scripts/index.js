@@ -3,11 +3,15 @@ fetch("/api/posts")
 .then(response => response.json())
 
 .then(data => {
+    add_posts(data);
+});
+
+function add_posts(data) {
+    const posts = document.getElementById("posts")
     if (data[0]) {
-        const posts = document.getElementById("posts")
         posts.innerHTML = "";
 
-        (async function() {
+        (async () => {
             for (const post of data) {
                 const figure = document.createElement("figure");
                 figure.classList.add("post");
@@ -37,8 +41,10 @@ fetch("/api/posts")
                 posts.appendChild(figure);
             }
         })();
+    } else {
+        posts.textContent = "No posts yet!";
     }
-});
+}
 
 document.getElementById("logo").addEventListener("click", () => {
     window.location.href = "/";
