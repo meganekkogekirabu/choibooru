@@ -311,4 +311,6 @@ app.get(/^\/([^\.]+)(\..+)?/, (req, res) => {
     });
 });
 
-app.listen(port, hostname);
+app.listen(port, hostname, () => {
+    console.log(`server running at http://${hostname}:${port}`);
+});
