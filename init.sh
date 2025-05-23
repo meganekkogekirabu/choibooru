@@ -7,10 +7,11 @@ sqlite3 booru.db <<EOF
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         uploader TEXT NOT NULL,
         date TIMESTAMP, 
-        score integer default 0,
-        voters text,
-        rating varchar(20)
-            check (rating in ('general', 'sensitive', 'questionable', 'explicit')), tags varchar
+        score INTEGER DEFAULT 0,
+        voters TEXT,
+        rating VARCHAR(20)
+            CHECK (rating IN ('general', 'sensitive', 'questionable', 'explicit')),
+        tags VARCHAR
     );
 
     CREATE TABLE IF NOT EXISTS users (
