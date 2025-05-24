@@ -11,24 +11,25 @@ if not exist "public\assets\logo.png" (
 )
 
 (
-echo CREATE TABLE IF NOT EXISTS posts(
-echo     src TEXT UNIQUE NOT NULL,
-echo     id INTEGER PRIMARY KEY AUTOINCREMENT,
-echo     uploader TEXT NOT NULL,
-echo     date TIMESTAMP, 
-echo     score INTEGER DEFAULT 0,
-echo     voters TEXT,
-echo     rating VARCHAR(20)
-echo         CHECK (rating IN ('general', 'sensitive', 'questionable', 'explicit')),
-echo     tags VARCHAR
+echo CREATE TABLE IF NOT EXISTS "posts" (
+echo    "src" TEXT NOT NULL UNIQUE,
+echo    "id" INTEGER,
+echo    "uploader" TEXT NOT NULL,
+echo    "date" TIMESTAMP,
+echo    "score" INTEGER DEFAULT 0,
+echo    "voters" TEXT,
+echo    "rating" VARCHAR(20) CHECK("rating" IN ('general', 'sensitive', 'questionable', 'explicit')),
+echo    "tags" TEXT,
+echo    "deleted" BOOL DEFAULT 0 CHECK("deleted" IN (0, 1)),
+echo    PRIMARY KEY("id" AUTOINCREMENT)
 echo );
-echo 
 echo CREATE TABLE IF NOT EXISTS users (
-echo     id INTEGER PRIMARY KEY AUTOINCREMENT,
-echo     username TEXT UNIQUE NOT NULL,
-echo     password TEXT NOT NULL,
-echo     user_groups TEXT,
-echo     deleted BOOL
+echo    "id" INTEGER,
+echo    "username" TEXT UNIQUE NOT NULL,
+echo    "password" TEXT NOT NULL,
+echo    "user_groups" TEXT,
+echo    "deleted" BOOL DEFAULT 0 CHECK("deleted" in (0, 1)),
+echo    PRIMARY KEY("id" AUTOINCREMENT)
 echo );
 echo .quit
 ) | sqlite3 booru.db

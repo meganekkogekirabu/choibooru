@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from "uuid";
 import "dotenv/config";
 import sharp from "sharp";
 import multer from "multer";
+import { unlink } from "node:fs";
 
 const port = process.argv[3] ?? 3000;
 const hostname = process.argv[2] ?? "127.0.0.1";
@@ -135,7 +136,7 @@ app.post("/api/logout", (req, res) => {
 app.get("/api/posts", async (req, res) => {
     const ret = [];
     for (const post of (await posts.grab())) {
-        if (post.rating === "explicit" && (!req.session.is_full || !req.session.username)) {
+        if ((post.rating === "explicit" || post.deleted === 1) && (!req.session.is_full || !req.session.username)) {
             continue;
         } else {
             ret.push(post);
@@ -189,8 +190,8 @@ app.get("/api/src", async (req, res) => {
 });
 
 app.post("/api/vote", async (req, res) => {
-    const row = await database.get(`SELECT voters FROM posts WHERE id = ?;`, [req.body.id]);
-    const voters = row.voters;
+    const _row = await database.get(`SELECT voters FROM posts WHERE id = ?;`, [req.body.id]);
+    const voters = _row.voters;
 
     if (!req.session.username || (voters?.includes("," + req.session.username + ",") ?? false)) {
         return res.status(403).send("Not authorised.");
@@ -221,8 +222,8 @@ app.post("/api/tag/add", async (req, res) => {
     }
 
     try {
-        const row = await database.get(`SELECT tags FROM posts WHERE id = ?;`, [req.body.id]);
-        const tags = row.tags;
+        const _row = await database.get(`SELECT tags FROM posts WHERE id = ?;`, [req.body.id]);
+        const tags = _row.tags;
         if (!tags?.includes("," + req.body.tag + ",")) {
             await database.run(`
                 UPDATE posts SET tags = CONCAT(tags, ",", ?, ",") WHERE id = ?;
@@ -309,6 +310,38 @@ app.get(/^\/([^\.]+)(\..+)?/, (req, res) => {
             res.status(404).sendFile(join(__dirname, "public", "not_found.html"));
         }
     });
+});
+
+app.post("/api/delete", async (req, res) => {
+    try {
+        if (!req.session.is_admin) {
+            return res.status(403).send("Not authorised.");
+        } else if (!req.body.id) {
+            return res.status(400).send("Bad request.");
+        }
+
+        const _row = await database.get(`
+            SELECT src FROM posts WHERE id = ?
+        `, [req.body.id]);
+        
+        const src = _row.src;
+
+        await database.run(`
+            UPDATE posts SET deleted = 1 WHERE id = ?
+        `, [req.body.id]);
+
+        unlink(join(__dirname, "public", src), (err) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send("An internal server error occurred.");
+            }
+        });
+
+        res.status(200).send("Successfully deleted.");
+    } catch(err) {
+        console.error(err);
+        res.status(500).send("An internal server error occurred.");
+    }
 });
 
 app.listen(port, hostname, () => {
