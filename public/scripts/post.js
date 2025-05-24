@@ -200,12 +200,13 @@ fetch(`/api/src${window.location.search}`, {
                 })});
             }
 
+            let dropdown;
             if (data.deleted === 1) {
                 const rating = document.createElement("p");
                 rating.innerHTML = `<br>rating: ${data.rating ?? "general"}`;
                 score.after(rating);
             } else {
-                const dropdown = document.createElement("select");
+                dropdown = document.createElement("select");
                 dropdown.id = "rating";
 
                 const ratings = ["general", "sensitive", "questionable", "explicit"];
@@ -251,9 +252,7 @@ fetch(`/api/src${window.location.search}`, {
                 label.after(dropdown);
             }
 
-            if (data.deleted === 1) {
-                
-            } else {
+            if (!data.deleted === 1) {
                 fetch("/api/auth", {method: "POST"})
                 .then(response => response.json())
                 .then(async authdata => {

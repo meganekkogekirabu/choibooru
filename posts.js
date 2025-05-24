@@ -4,10 +4,7 @@ export async function grab() {
     try {
         return await database.all(`
             SELECT * FROM posts;
-        `)
-        .then((arr) => {
-            return arr.slice(-16) // grab only the latest sixteen
-        });
+        `);
     } catch(err) {
         console.error(err);
         return [];

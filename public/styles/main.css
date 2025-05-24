@@ -54,6 +54,12 @@ body {
     background-color: #EEF;
 }
 
+@media screen and (max-width: 1300px) {
+    #sidebar * {
+        font-size: 1.2cqw;
+    }
+}
+
 div#head-wrapper {
     grid-area: 1 / 1 / 2 / 8;
     width: inherit;
@@ -90,7 +96,7 @@ button:hover,
 input[type=submit]:hover,
 ::file-selector-button:hover {
     cursor: pointer;
-    background-color: #ff78a9;
+    background-color: #FF78A9;
     color: #FFF;
 }
 
@@ -121,12 +127,13 @@ input:not([type=submit]) {
     flex-wrap: wrap;
     height: fit-content;
     justify-content: left;
-    grid-area: 2 / 2 / 5 / 8;
+    grid-area: 2 / 2 / 4 / 8;
 }
 
 .post {
     margin: 20px;
     height: 150px;
+    max-width: 300px;
 }
 
 .post>img {
@@ -169,4 +176,37 @@ label {
     all: unset;
     margin-left: 10px;
     cursor: pointer;
+}
+
+.post > img {
+    max-width: inherit;
+}
+
+#pagination {
+    grid-area: 4 / 2 / 5 / 8;
+    display: flex;
+    justify-content: center;
+    gap: 0.5em;
+    flex-wrap: wrap;
+    padding: 1em;
+}
+
+#pagination button {
+    width: fit-content;
+    height: fit-content;
+    padding: 0.5em 1em;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+#pagination > button[disabled] {
+    visibility: hidden;
+}
+
+#pagination-num > button[disabled] {
+    background-color: #FF78A9;
+    color: white;
+    transform: scale(1.1);
+    font-weight: bold;
+    cursor: default;
 }
