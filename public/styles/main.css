@@ -68,10 +68,6 @@ div#head-wrapper {
     height: 140px;
 }
 
-#posts {
-    grid-area: 2 / 2 / 5 / 8;
-}
-
 #head-wrapper>* {
     margin: 20px;
     height: 100px;
@@ -122,10 +118,10 @@ input:not([type=submit]) {
 
 #posts {
     display: flex;
-    flex-direction: row-reverse;
     flex-wrap: wrap;
     height: fit-content;
     justify-content: left;
+    grid-area: 2 / 2 / 5 / 8;
 }
 
 .post {
@@ -167,4 +163,10 @@ label {
 
 #sign-form > input {
     width: 6vw;
+}
+
+#submit {
+    all: unset;
+    margin-left: 10px;
+    cursor: pointer;
 }

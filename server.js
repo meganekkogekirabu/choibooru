@@ -52,11 +52,11 @@ app.get("/", (_, res) => {
 
 app.get(["/post", "/post.html"], async (req, res) => {
     await database.get(`
-        SELECT rating FROM posts WHERE id = ?;
+        SELECT rating, deleted FROM posts WHERE id = ?;
     `, [req.query.id])
 
     .then(data => {
-        if (data.rating === "explicit" && (!req.session.is_full || !req.session.username)) {
+        if ((data.rating === "explicit" || data.deleted === 1) && (!req.session.is_full || !req.session.username)) {
             res.redirect("/");
         } else {
             res.sendFile(join(__dirname, "public", "post.html"));
@@ -66,14 +66,18 @@ app.get(["/post", "/post.html"], async (req, res) => {
 
 app.get("/assets/posts/:filename", async (req, res) => {
     await database.get(`
-        SELECT rating FROM posts WHERE src = ?;
+        SELECT rating, deleted FROM posts WHERE src = ?;
     `, [req.path.replace(/^\//, "")])
 
     .then(data => {
-        if (data.rating === "explicit" && (!req.session.is_full || !req.session.username)) {
+        if ((data.rating === "explicit" || data.deleted === 1) && (!req.session.is_full || !req.session.username)) {
             res.redirect("/");
         } else {
-            res.sendFile(join(__dirname, "public", req.path));
+            res.sendFile(join(__dirname, "public", req.path), (err) => {
+                if (err) {
+                    res.status(404).sendFile(join(__dirname, "public", "assets", "posts", "deleted.png"));
+                }
+            });
         }
     });
 })
@@ -142,7 +146,7 @@ app.get("/api/posts", async (req, res) => {
             ret.push(post);
         }
     }
-    res.json(ret);
+    res.json(ret.reverse());
 });
 
 app.post("/api/upload", upload.single("post"), async (req, res) => {

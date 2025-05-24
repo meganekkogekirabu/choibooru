@@ -8,93 +8,109 @@ fetch(`/api/src${window.location.search}`, {
     const posts = document.getElementById("posts");
     posts.innerHTML = "";
 
-    const figure = document.createElement("figure");
-    const img = document.createElement("img");
-    img.src = data.src;
-    img.style["max-height"] = "400px";
-
-    const caption = document.createElement("figcaption");
-    caption.style.display = "flex";
-    caption.style["justify-content"] = "space-between";
-    caption.style["margin-top"] = "15px";
-
-    const status = document.createElement("div");
-    status.style["font-size"] = "13px";
-
-    const vote = document.createElement("div");
-
-    const upvote = document.createElement("a");
-    upvote.textContent = "▲";
-    upvote.style.color = "#5963A6";
-    upvote.style.border = "solid 1px";
-    upvote.style.cursor = "pointer";
-    upvote.addEventListener("click", () => {
+    if (data.deleted === 1) {
+        const p = document.createElement("p");
+        p.textContent = "This post has been deleted.";
+        posts.appendChild(p);
         fetch("/api/auth", {method: "POST"})
         .then(response => response.json())
-        .then(async authdata => {
-            if (!authdata.username) {
-                status.textContent = "You must be logged in to vote.";
-            } else {
-                await fetch("/api/vote", {
-                    method  : "POST",
-                    headers : {
-                        "Content-Type": "application/json",
-                    },
-                    body    : JSON.stringify({
-                        dir : 1,
-                        id  : data.id,
-                    }),
-                });
-                window.location.reload();
+        .then(authdata => {
+            if (authdata.is_admin) {
+                p.innerHTML = `${p.textContent}<br><br>Original filename: ${data.src}`
             }
+        })
+    } else {
+        const figure = document.createElement("figure");
+        const img = document.createElement("img");
+        img.src = data.src;
+        img.style["max-height"] = "400px";
+
+        const caption = document.createElement("figcaption");
+        caption.style.display = "flex";
+        caption.style["justify-content"] = "space-between";
+        caption.style["margin-top"] = "15px";
+
+        const status = document.createElement("div");
+        status.style["font-size"] = "13px";
+
+        const vote = document.createElement("div");
+
+        const upvote = document.createElement("a");
+        upvote.textContent = "▲";
+        upvote.style.color = "#5963A6";
+        upvote.style.border = "solid 1px";
+        upvote.style.cursor = "pointer";
+        upvote.addEventListener("click", () => {
+            fetch("/api/auth", {method: "POST"})
+            .then(response => response.json())
+            .then(async authdata => {
+                if (!authdata.username) {
+                    status.textContent = "You must be logged in to vote.";
+                } else {
+                    await fetch("/api/vote", {
+                        method  : "POST",
+                        headers : {
+                            "Content-Type": "application/json",
+                        },
+                        body    : JSON.stringify({
+                            dir : 1,
+                            id  : data.id,
+                        }),
+                    });
+                    window.location.reload();
+                }
+            });
         });
-    });
 
-    const downvote = document.createElement("a");
-    downvote.textContent = "▼";
-    downvote.style.color = "#A659A3";
-    downvote.style.border = "solid 1px";
-    downvote.style.cursor = "pointer";
-    downvote.addEventListener("click", () => {
-        fetch("/api/auth", {method: "POST"})
-        .then(response => response.json())
-        .then(async data => {
-            if (!data.username) {
-                status.textContent = "You must be logged in to vote.";
-            } else {
-                await fetch("/api/vote", {
-                    method  : "POST",
-                    headers : {
-                        "Content-Type": "application/json",
-                    },
-                    body    : JSON.stringify({
-                        dir : -1,
-                        id  : data.id,
-                    }),
-                });
-                window.location.reload();
-            }
+        const downvote = document.createElement("a");
+        downvote.textContent = "▼";
+        downvote.style.color = "#A659A3";
+        downvote.style.border = "solid 1px";
+        downvote.style.cursor = "pointer";
+        downvote.addEventListener("click", () => {
+            fetch("/api/auth", {method: "POST"})
+            .then(response => response.json())
+            .then(async data => {
+                if (!data.username) {
+                    status.textContent = "You must be logged in to vote.";
+                } else {
+                    await fetch("/api/vote", {
+                        method  : "POST",
+                        headers : {
+                            "Content-Type": "application/json",
+                        },
+                        body    : JSON.stringify({
+                            dir : -1,
+                            id  : data.id,
+                        }),
+                    });
+                    window.location.reload();
+                }
+            });
         });
-    });
 
-    vote.appendChild(upvote);
-    vote.appendChild(downvote);
-    caption.appendChild(vote);
-    caption.appendChild(status);
+        vote.appendChild(upvote);
+        vote.appendChild(downvote);
+        caption.appendChild(vote);
+        caption.appendChild(status);
 
-    figure.appendChild(img);
-    figure.appendChild(caption);
-    posts.appendChild(figure);
+        figure.appendChild(img);
+        figure.appendChild(caption);
+        posts.appendChild(figure);
+    }
 
     const sidebar = document.getElementById("sidebar");
-    const a = document.createElement("a");
-    a.href = data.src;
-    a.innerHTML = "original image &raquo;";
-    a.target = "_blank";
-    sidebar.appendChild(a);
+
+    if (data.deleted !== 1) {
+        const a = document.createElement("a");
+        a.href = data.src;
+        a.innerHTML = "original image &raquo;<br><br>";
+        a.target = "_blank";
+        sidebar.appendChild(a);
+    }
 
     const score = document.createElement("p");
-    score.innerHTML = `<br>score: ${data.score}`;
+    score.innerHTML = `score: ${data.score}`;
     sidebar.appendChild(score);
 
     const tag_head = document.createElement("p")
@@ -123,102 +139,107 @@ fetch(`/api/src${window.location.search}`, {
 
     fetch("/api/auth", {method: "POST"})
     .then(response => response.json())
-    .then(authdata => {
+    .then(async (authdata) => {
         if (authdata.username) {
-            const form = document.createElement("form");
-            form.style.all = "unset";
-            form.style["margin-top"] = "15px";
-            form.style.display = "inline-block";
+            if (data.deleted !== 1)  {
+                const form = document.createElement("form");
+                form.style["margin-top"] = "15px";
+                form.style.display = "inline-block";
 
-            const input = document.createElement("input");
-            input.name = "tag";
-            input.style.height = "10px";
-            input.style.width = "80px";
+                const input = document.createElement("input");
+                input.name = "tag";
+                input.style.height = "10px";
+                input.style.width = "80px";
 
-            const submit = document.createElement("input");
-            submit.type = "submit";
-            submit.value = "+";
-            submit.style.all = "unset";
-            submit.style["margin-left"] = "10px";
-            submit.style.cursor = "pointer";
+                const submit = document.createElement("input");
+                submit.type = "submit";
+                submit.value = "+";
+                submit.id = "submit";
 
-            form.appendChild(input);
-            form.appendChild(submit);
+                form.appendChild(input);
+                form.appendChild(submit);
 
-            form.addEventListener("submit", async (event) => {
-                event.preventDefault();
+                form.addEventListener("submit", async (event) => {
+                    event.preventDefault();
 
-                const formData = new FormData(form);
-                
-                await fetch("/api/tag/add", {
-                    method  : "POST",
-                    headers : {
-                        "Content-Type": "application/json",
-                    },
-                    body    : JSON.stringify({
-                        tag : formData.get("tag"),
-                        id  : data.id,
-                    }),
-                });
-
-                window.location.reload();
-            })
-
-            sidebar.appendChild(form);
-
-            document.querySelectorAll(".tag").forEach(tag => {
-                tag.innerHTML = "&nbsp;-";
-                tag.style.cursor = "pointer";
-                
-                tag.addEventListener("click", async () => {
-                await fetch("/api/tag/remove", {
-                    method  : "POST",
-                    headers : {
-                        "Content-Type": "application/json",
-                    },
-                    body    : JSON.stringify({
-                        tag : tag.dataset.target,
-                        id  : data.id,
-                    }),
-                });
-
-                window.location.reload();
-            })});
-
-            const dropdown = document.createElement("select");
-            dropdown.id = "rating";
-
-            const ratings = ["general", "sensitive", "questionable", "explicit"];
-
-            ratings.forEach(option => {
-                const element = document.createElement("option");
-                element.value = option;
-                element.textContent = option;
-
-                if (data.rating === option) element.selected = true;
-
-                dropdown.appendChild(element);
-            });
-
-            dropdown.addEventListener("change", async (event) => {
-                const selected = event.target.value
-
-                try {
-                    await fetch("/api/rate", {
+                    const formData = new FormData(form);
+                    
+                    await fetch("/api/tag/add", {
                         method  : "POST",
                         headers : {
                             "Content-Type": "application/json",
                         },
                         body    : JSON.stringify({
-                            id     : data.id,
-                            rating : selected,
+                            tag : formData.get("tag"),
+                            id  : data.id,
                         }),
                     });
+
                     window.location.reload();
-                } catch(err) {
-                    console.error(err);
-                }
-            })
+                })
+
+                sidebar.appendChild(form);
+
+                document.querySelectorAll(".tag").forEach(tag => {
+                    tag.innerHTML = "&nbsp;-";
+                    tag.style.cursor = "pointer";
+                    
+                    tag.addEventListener("click", async () => {
+                    await fetch("/api/tag/remove", {
+                        method  : "POST",
+                        headers : {
+                            "Content-Type": "application/json",
+                        },
+                        body    : JSON.stringify({
+                            tag : tag.dataset.target,
+                            id  : data.id,
+                        }),
+                    });
+
+                    window.location.reload();
+                })});
+            }
+
+            if (data.deleted === 1) {
+                const rating = document.createElement("p");
+                rating.innerHTML = `<br>rating: ${data.rating ?? "general"}`;
+                score.after(rating);
+            } else {
+                const dropdown = document.createElement("select");
+                dropdown.id = "rating";
+
+                const ratings = ["general", "sensitive", "questionable", "explicit"];
+
+                ratings.forEach(option => {
+                    const element = document.createElement("option");
+                    element.value = option;
+                    element.textContent = option;
+
+                    if (data.rating === option) element.selected = true;
+
+                    dropdown.appendChild(element);
+                });
+
+                dropdown.addEventListener("change", async (event) => {
+                    const selected = event.target.value
+
+                    try {
+                        await fetch("/api/rate", {
+                            method  : "POST",
+                            headers : {
+                                "Content-Type": "application/json",
+                            },
+                            body    : JSON.stringify({
+                                id     : data.id,
+                                rating : selected,
+                            }),
+                        });
+                        window.location.reload();
+                    } catch(err) {
+                        console.error(err);
+                    }
+                });
+            }
 
             const label = document.createElement("label");
             label.textContent = "rating:";
@@ -226,7 +247,39 @@ fetch(`/api/src${window.location.search}`, {
 
             score.after(label);
             score.after(document.createElement("br"));
-            label.after(dropdown);
+            if (typeof dropdown !== "undefined") {
+                label.after(dropdown);
+            }
+
+            if (data.deleted === 1) {
+                
+            } else {
+                fetch("/api/auth", {method: "POST"})
+                .then(response => response.json())
+                .then(async authdata => {
+                    if (authdata.is_admin) {
+                        const button = document.createElement("button")
+                        button.textContent = "delete";
+                        button.style["margin-top"] = "15px";
+                        button.addEventListener("click", async () => {
+                            if (confirm("Are you sure you want to delete this post?")) {
+                                await fetch("/api/delete", {
+                                    method  : "POST",
+                                    headers : {
+                                        "Content-Type": "application/json",
+                                    },
+                                    body    : JSON.stringify({
+                                        id : data.id,
+                                    }),
+                                });
+
+                                window.location.reload();
+                            }
+                        });
+                        sidebar.appendChild(button);
+                    }
+                });
+            }
         } else {
             const rating = document.createElement("p");
             rating.innerHTML = `<br>rating: ${data.rating}`;
