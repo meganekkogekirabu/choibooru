@@ -6,6 +6,7 @@ npm install
 mkdir -p public/assets/posts
 [ ! -f "public/assets/logo.png" ] && printf "\ncouldn't find logo, make sure you add one to public/assets/logo.png\n"
 [ ! -f "public/assets/404.png" ] && printf "\ncouldn't find 404 image, make sure you add one to public/assets/404.png\n"
+[ ! -f "public/assets/posts/deleted.png" ] && printf "\ncouldn't find deleted placeholder, make sure you add one to public/assets/posts/deleted.png\n"
 
 sqlite3 booru.db <<EOF
     CREATE TABLE IF NOT EXISTS "posts" (
@@ -44,7 +45,7 @@ EOF
     sleep 5
     exit 1
 else
-    printf "\n"
+    echo
     set -a && source .env && set +a
     node server.js "$HOSTNAME" "$PORT"
 fi

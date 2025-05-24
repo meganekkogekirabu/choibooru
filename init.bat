@@ -10,6 +10,18 @@ if not exist "public\assets\logo.png" (
     echo.
 )
 
+if not exist "public\assets\404.png" (
+    echo.
+    echo couldn't find 404 image, make sure you add one to public/assets/404.png
+    echo.
+)
+
+if not exist "public\assets\posts\deleted.png" (
+    echo.
+    echo couldn't find deleted placeholder, make sure you add one to public/assets/posts/deleted.png
+    echo.
+)
+
 (
 echo CREATE TABLE IF NOT EXISTS "posts" (
 echo    "src" TEXT NOT NULL UNIQUE,
