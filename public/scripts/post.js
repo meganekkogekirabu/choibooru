@@ -18,7 +18,7 @@ fetch(`/api/src${window.location.search}`, {
             if (authdata.is_admin) {
                 p.innerHTML = `${p.textContent}<br><br>Original filename: ${data.src}`
             }
-        })
+        });
     } else {
         const figure = document.createElement("figure");
         const img = document.createElement("img");
@@ -252,7 +252,7 @@ fetch(`/api/src${window.location.search}`, {
                 label.after(dropdown);
             }
 
-            if (!data.deleted === 1) {
+            if (data.deleted !== 1) {
                 fetch("/api/auth", {method: "POST"})
                 .then(response => response.json())
                 .then(async authdata => {
