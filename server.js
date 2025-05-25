@@ -138,15 +138,25 @@ app.post("/api/logout", (req, res) => {
 });
 
 app.get("/api/posts", async (req, res) => {
-    const ret = [];
-    for (const post of (await posts.grab())) {
+    const all_posts = await posts.grab();
+    const filtered_posts = [];
+    
+    for (const post of all_posts) {
         if ((post.rating === "explicit" || post.deleted === 1) && (!req.session.is_full || !req.session.username)) {
             continue;
         } else {
-            ret.push(post);
+            filtered_posts.push(post);
         }
     }
-    res.json(ret.reverse());
+
+    if (req.query.total === "true") {
+        return res.json({total: filtered_posts.length});
+    }
+
+    const offset = parseInt(req.query.offset) || 0;
+    const limit = parseInt(req.query.limit) || 10;
+    const paginated_posts = filtered_posts.reverse().slice(offset, offset + limit);
+    res.json(paginated_posts);
 });
 
 app.post("/api/upload", upload.single("post"), async (req, res) => {
@@ -281,16 +291,31 @@ app.post("/api/rate", async (req, res) => {
 
 app.post("/api/search", async (req, res) => {
     try {
-        const { tag } = req.body;
+        const { tag, offset, limit, total } = req.body;
 
         if (!tag || typeof tag !== "string") {
             return res.status(400).send("Bad request.");
         }
 
-        const ret = [];
-        const posts = await database.all(`
+        let query = `
             SELECT * FROM posts WHERE tags LIKE ?
-        `, [`%,${tag},%`])
+        `;
+        const params = [`%,${tag},%`];
+
+        if (total) {
+            const count = await database.get(`
+                SELECT COUNT(*) as count FROM posts WHERE tags LIKE ?
+            `, params);
+            return res.json({ total: count.count, tag: tag });
+        }
+
+        const page_offset = parseInt(offset) || 0;
+        const page_limit = parseInt(limit) || 10;
+        query += ` LIMIT ? OFFSET ?`;
+        params.push(page_limit, page_offset);
+
+        const posts = await database.all(query, params);
+        const ret = [];
 
         for (const post of posts) {
             if (post.rating === "explicit" && (!req.session.is_full || !req.session.username)) {
@@ -300,13 +325,13 @@ app.post("/api/search", async (req, res) => {
             }
         }
         
-        res.json(ret);
+        res.json(ret.reverse());
 
     } catch(err) {
         console.error(err);
         res.status(500).send("An internal server error occurred.");
     }
-})
+});
 
 app.get(/^\/([^\.]+)(\..+)?/, (req, res) => {
     res.sendFile(join(__dirname, "public", req.params[0] + (req.params[1] || ".html")), (err) => {

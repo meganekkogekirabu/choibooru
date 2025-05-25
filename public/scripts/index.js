@@ -1,15 +1,8 @@
-fetch("/api/posts")
-
-.then(response => response.json())
-
-.then(data => {
-    add_posts(data);
-});
-
 function add_posts(data) {
     const posts = document.getElementById("posts");
     const parent = document.getElementById("parent");
     let current = 1;
+    let current_search_tag = data.tag || "";
 
     function calculate_chunk_size() {
         const viewport_width = window.innerWidth;
@@ -20,16 +13,36 @@ function add_posts(data) {
     }
 
     let chunk = calculate_chunk_size();
-    let total = Math.ceil(data.length / chunk);
+    let total = Math.ceil(data.total / chunk);
     
     function display(page) {
         posts.innerHTML = "";
         current = page;
         
         const start = (page - 1) * chunk;
-        const end = start + chunk;
-        const page_data = data.slice(start, end);
+        
+        if (current_search_tag) {
+            fetch("/api/search", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    tag: current_search_tag,
+                    offset: start,
+                    limit: chunk
+                }),
+            })
+            .then(response => response.json())
+            .then(page_data => render_posts(page_data));
+        } else {
+            fetch(`/api/posts?offset=${start}&limit=${chunk}`)
+                .then(response => response.json())
+                .then(page_data => render_posts(page_data));
+        }
+    }
 
+    function render_posts(page_data) {
         for (const post of page_data) {
             const figure = document.createElement("figure");
             figure.classList.add("post");
@@ -58,7 +71,6 @@ function add_posts(data) {
             figure.appendChild(subtitle);
             posts.appendChild(figure);
         }
-
         update();
     }
 
@@ -74,7 +86,7 @@ function add_posts(data) {
         const new_chunk = calculate_chunk_size();
         if (new_chunk !== chunk) {
             chunk = new_chunk;
-            total = Math.ceil(data.length / chunk);
+            total = Math.ceil(data.total / chunk);
             current = Math.min(current, total);
         }
 
@@ -126,16 +138,26 @@ function add_posts(data) {
         pagination.appendChild(last_button);
     }
 
-    if (data.length) {
+    if (data.total) {
         display(1);
         
         window.addEventListener("resize", () => {
             display(current);
         });
     } else {
-        posts.textContent = "No posts yet!";
+        posts.textContent = current_search_tag ? 
+            `No results found for "${current_search_tag}"` : 
+            "No posts yet!";
     }
 }
+
+fetch("/api/posts?total=true")
+
+.then(response => response.json())
+
+.then(data => {
+    add_posts(data);
+});
 
 document.getElementById("logo").addEventListener("click", () => {
     window.location.href = "/";
