@@ -4,9 +4,18 @@ exec > >(tee .log) 2>&1
 
 npm install
 mkdir -p public/assets/posts
-[ ! -f "public/assets/logo.png" ] && printf "\ncouldn't find logo, make sure you add one to public/assets/logo.png\n"
-[ ! -f "public/assets/404.png" ] && printf "\ncouldn't find 404 image, make sure you add one to public/assets/404.png\n"
-[ ! -f "public/assets/posts/deleted.png" ] && printf "\ncouldn't find deleted placeholder, make sure you add one to public/assets/posts/deleted.png\n"
+
+declare -a assets=(
+    "public/assets/logo.png"
+    "public/assets/404.png"
+    "public/assets/posts/deleted.png"
+    "public/assets/favicon.ico"
+)
+
+for asset in "${assets[@]}"
+do
+    [ ! -f "$asset" ] && printf "\ncouldn't find $asset, make sure you add it"
+done
 
 sqlite3 booru.db <<EOF
     CREATE TABLE IF NOT EXISTS "posts" (

@@ -4,23 +4,25 @@ call npm install
 
 if not exist "public\assets\posts" mkdir "public\assets\posts"
 
-if not exist "public\assets\logo.png" (
-    echo.
-    echo couldn't find logo, make sure you add one to public/assets/logo.png
-    echo.
+setlocal enabledelayedexpansion
+
+set "assets[0]=public\assets\logo.png"
+set "assets[1]=public\assets\404.png"
+set "assets[2]=public\assets\posts\deleted.png"
+set "assets[3]=public\assets\favicon.ico"
+
+set "count=0"
+:loop
+if defined assets[%count%] (
+    if not exist "!assets[%count%]!" (
+        echo.
+        echo couldn't find !assets[%count%]!, make sure you add it
+    )
+    set /a count+=1
+    goto :loop
 )
 
-if not exist "public\assets\404.png" (
-    echo.
-    echo couldn't find 404 image, make sure you add one to public/assets/404.png
-    echo.
-)
-
-if not exist "public\assets\posts\deleted.png" (
-    echo.
-    echo couldn't find deleted placeholder, make sure you add one to public/assets/posts/deleted.png
-    echo.
-)
+endlocal
 
 (
 echo CREATE TABLE IF NOT EXISTS "posts" (
