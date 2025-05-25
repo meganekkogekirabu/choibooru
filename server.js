@@ -10,6 +10,7 @@ import "dotenv/config";
 import sharp from "sharp";
 import multer from "multer";
 import { unlink } from "node:fs";
+import favicon from "serve-favicon";
 
 const port = process.argv[3] ?? 3000;
 const hostname = process.argv[2] ?? "127.0.0.1";
@@ -22,7 +23,7 @@ const upload = multer({
       fileSize : 5 * 1024 * 1024, // 5MB
       files    : 1
     },
-    fileFilter : (req, file, cb) => {
+    fileFilter : (_, file, cb) => {
         if (file.mimetype.startsWith("image/")) {
             cb(null, true);
         } else {
@@ -30,6 +31,14 @@ const upload = multer({
         }
     }
 });
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+try {
+    app.use(favicon(join(__dirname, "public", "assets", "favicon.ico")));
+} catch(err) {
+    console.error("serve-favicon middleware failed to get favicon");
+}
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -43,8 +52,6 @@ app.use(session({
         return uuidv4();
     },
 }));
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
 app.get("/", (_, res) => {
     res.sendFile(join(__dirname, "public", "index.html"));
