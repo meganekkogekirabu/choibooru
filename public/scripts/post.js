@@ -10,15 +10,8 @@ fetch(`/api/src${window.location.search}`, {
 
     if (data.deleted === 1) {
         const p = document.createElement("p");
-        p.textContent = "This post has been deleted.";
+        p.innerHTML = `This post has been deleted.<br><br>Original filename: ${data.src}`;
         posts.appendChild(p);
-        fetch("/api/auth", {method: "POST"})
-        .then(response => response.json())
-        .then(authdata => {
-            if (authdata.is_admin) {
-                p.innerHTML = `${p.textContent}<br><br>Original filename: ${data.src}`
-            }
-        });
     } else {
         const figure = document.createElement("figure");
         const img = document.createElement("img");
