@@ -1,4 +1,16 @@
 @echo off
+SETLOCAL
+
+call :log > "%cd%\init.bat.log" 2>&1
+exit /b
+
+:log
+
+tasklist /FI "IMAGENAME eq node.exe" /FI "COMMANDLINE eq server.js" | findstr /i "node.exe" >nul
+if %ERRORLEVEL% EQU 0 (
+    echo node is already running, exiting...
+    exit /b 1
+)
 
 call npm install
 

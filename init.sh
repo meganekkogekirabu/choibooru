@@ -1,6 +1,12 @@
 #!/bin/bash
 
-exec > >(tee .log) 2>&1
+exec > >(tee init.sh.log) 2>&1
+
+# check if node is already running
+if pgrep -f "node server.js" > /dev/null; then
+    echo "node is already running, exiting..."
+    exit 1
+fi
 
 npm install
 mkdir -p public/assets/posts
@@ -56,5 +62,5 @@ EOF
 else
     echo
     set -a && source .env && set +a
-    node server.js "$HOSTNAME" "$PORT"
+    exec node server.js "$HOSTNAME" "$PORT"
 fi
