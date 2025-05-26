@@ -1,16 +1,21 @@
+const tr = i18n.load_translations().then(async () => {
+    return await i18n.translations;
+});
+
 fetch(`/api/src${window.location.search}`, {
     method : "GET",
 })
 
 .then(response => response.json())
 
-.then(data => {
+.then(async (data) => {
+    const t = await tr;
     const posts = document.getElementById("posts");
     posts.innerHTML = "";
 
     if (data.deleted === 1) {
         const p = document.createElement("p");
-        p.innerHTML = `This post has been deleted.<br><br>Original filename: ${data.src}`;
+        p.innerHTML = `${t["post-deleted"]}<br><br>${t["post-original-filename"]} ${data.src}`;
         posts.appendChild(p);
     } else {
         const figure = document.createElement("figure");
@@ -38,7 +43,7 @@ fetch(`/api/src${window.location.search}`, {
             .then(response => response.json())
             .then(async authdata => {
                 if (!authdata.username) {
-                    status.textContent = "You must be logged in to vote.";
+                    status.textContent = t["post-vote-warning"];
                 } else {
                     await fetch("/api/vote", {
                         method  : "POST",
@@ -65,7 +70,7 @@ fetch(`/api/src${window.location.search}`, {
             .then(response => response.json())
             .then(async data => {
                 if (!data.username) {
-                    status.textContent = "You must be logged in to vote.";
+                    status.textContent = t["post-vote-warning"];
                 } else {
                     await fetch("/api/vote", {
                         method  : "POST",
@@ -97,24 +102,24 @@ fetch(`/api/src${window.location.search}`, {
     if (data.deleted !== 1) {
         const a = document.createElement("a");
         a.href = data.src;
-        a.innerHTML = "original image &raquo;<br><br>";
+        a.innerHTML = `${t["post-original-image"]} &raquo;<br><br>`;
         a.target = "_blank";
         sidebar.appendChild(a);
     }
 
     const score = document.createElement("p");
-    score.innerHTML = `score: ${data.score}`;
+    score.innerHTML = `${t["post-score"]} ${data.score}`;
     sidebar.appendChild(score);
 
     const tag_head = document.createElement("p")
-    tag_head.innerHTML = "<br>tags:";
+    tag_head.innerHTML = `<br>${t["post-tags"]}`;
 
     const tags = document.createElement("ul");
     tags.style.padding = "10px";
 
     if (!data.tags) {
         const li = document.createElement("li");
-        li.textContent = "tag me!";
+        li.textContent = t["post-tagme"];
         tags.appendChild(li);
     } else {
         const _tags = data.tags.match(/[^,]+/g)?.filter(Boolean) || [];
@@ -196,13 +201,21 @@ fetch(`/api/src${window.location.search}`, {
             let dropdown;
             if (data.deleted === 1) {
                 const rating = document.createElement("p");
-                rating.innerHTML = `<br>rating: ${data.rating ?? "general"}`;
+                rating.innerHTML = `<br>${t["post-rating"]} ${data.rating ?? "general"}`;
                 score.after(rating);
             } else {
+                const label = document.createElement("label");
+                label.textContent = t["post-rating"];
+                label.for = "rating";
+
+                score.after(label);
+                score.after(document.createElement("br"));
+
                 dropdown = document.createElement("select");
                 dropdown.id = "rating";
 
                 const ratings = ["general", "sensitive", "questionable", "explicit"];
+                // FIXME: these aren't integrated with i18n
 
                 ratings.forEach(option => {
                     const element = document.createElement("option");
@@ -233,15 +246,7 @@ fetch(`/api/src${window.location.search}`, {
                         console.error(err);
                     }
                 });
-            }
 
-            const label = document.createElement("label");
-            label.textContent = "rating:";
-            label.for = "rating";
-
-            score.after(label);
-            score.after(document.createElement("br"));
-            if (typeof dropdown !== "undefined") {
                 label.after(dropdown);
             }
 
@@ -251,10 +256,10 @@ fetch(`/api/src${window.location.search}`, {
                 .then(async authdata => {
                     if (authdata.is_admin) {
                         const button = document.createElement("button")
-                        button.textContent = "delete";
+                        button.textContent = t["post-delete"];
                         button.style["margin-top"] = "15px";
                         button.addEventListener("click", async () => {
-                            if (confirm("Are you sure you want to delete this post?")) {
+                            if (confirm(t["post-delete-confirm"])) {
                                 await fetch("/api/delete", {
                                     method  : "POST",
                                     headers : {
@@ -274,17 +279,17 @@ fetch(`/api/src${window.location.search}`, {
             }
         } else {
             const rating = document.createElement("p");
-            rating.innerHTML = `<br>rating: ${data.rating}`;
+            rating.innerHTML = `<br>${t["post-rating"]} ${data.rating}`;
             score.after(rating);
         }
     });
 
     const uploader = document.createElement("p");
-    uploader.innerHTML = `<br>uploader: ${data.uploader}`;
+    uploader.innerHTML = `<br>${t["post-uploader"]} ${data.uploader}`;
     sidebar.appendChild(uploader);
 
     const date = document.createElement("p");
-    date.innerHTML = `<br>date uploaded: ${new Date(data.date).toLocaleDateString()}`;
+    date.innerHTML = `<br>${t["post-date"]} ${new Date(data.date).toLocaleDateString()}`;
     sidebar.appendChild(date);
 
     sidebar.appendChild(tag_head);
@@ -293,4 +298,10 @@ fetch(`/api/src${window.location.search}`, {
 
 document.getElementById("logo").addEventListener("click", () => {
     window.location.href = "/";
+});
+
+i18n.load_translations().then(() => {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        el.innerHTML = i18n.t(el.dataset.i18n, el.dataset.i18nParams);
+    });
 });

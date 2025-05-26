@@ -11,6 +11,9 @@ import sharp from "sharp";
 import multer from "multer";
 import { unlink } from "node:fs";
 import favicon from "serve-favicon";
+import { createRequire } from "module";
+
+const require = createRequire(import.meta.url); // for loading i18n json
 
 const port = process.argv[3] ?? 3000;
 const hostname = process.argv[2] ?? "127.0.0.1";
@@ -340,14 +343,6 @@ app.post("/api/search", async (req, res) => {
     }
 });
 
-app.get(/^\/([^\.]+)(\..+)?/, (req, res) => {
-    res.sendFile(join(__dirname, "public", req.params[0] + (req.params[1] || ".html")), (err) => {
-        if (err) {
-            res.status(404).sendFile(join(__dirname, "public", "not_found.html"));
-        }
-    });
-});
-
 app.post("/api/delete", async (req, res) => {
     try {
         if (!req.session.is_admin) {
@@ -378,6 +373,20 @@ app.post("/api/delete", async (req, res) => {
         console.error(err);
         res.status(500).send("An internal server error occurred.");
     }
+});
+
+app.get("/api/translations", (req, res) => {
+    const { lang } = req.query;
+    const translations = require(`./i18n/${lang}.json`);
+    res.json(translations);
+})
+
+app.get(/^\/([^\.]+)(\..+)?/, (req, res) => {
+    res.sendFile(join(__dirname, "public", req.params[0] + (req.params[1] || ".html")), (err) => {
+        if (err) {
+            res.status(404).sendFile(join(__dirname, "public", "not_found.html"));
+        }
+    });
 });
 
 app.listen(port, hostname, () => {

@@ -1,3 +1,5 @@
+// FIXME: needs i18n
+
 import * as database from "./database.js";
 import bcrypt from "bcryptjs";
 

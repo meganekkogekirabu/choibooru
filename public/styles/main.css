@@ -210,3 +210,7 @@ label {
     font-weight: bold;
     cursor: default;
 }
+
+[data-i18n] {
+    display: inline;
+}

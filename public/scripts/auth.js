@@ -4,16 +4,17 @@ fetch("/api/auth", {
 
 .then(response => response.json())
 
-.then((data) => {
+.then(async (data) => {
+    const t = await tr;
     if (data.username) {
         const signin_status = document.getElementById("signin-status");
-        signin_status.innerHTML = `<br><br>You are currently signed in as <span style="color: #F16;">${escape(data.username)}</span>.`;
+        signin_status.innerHTML = `<br><br>${t["common-signin-status"].replace("{user}", `<span style="color: #F16;">${data.username}</span>`)}`;
 
         const sign_wrapper = document.getElementById("sign-wrapper");
         sign_wrapper.innerHTML = "";
 
         const logout = document.createElement("button");
-        logout.textContent = "log out";
+        logout.textContent = t["common-log-out"];
 
         logout.addEventListener("click", async () => {
             await fetch("/api/logout", {
@@ -25,7 +26,7 @@ fetch("/api/auth", {
         sign_wrapper.appendChild(logout);
 
         const upload = document.createElement("button");
-        upload.textContent = "upload";
+        upload.textContent = t["common-upload"];
 
         upload.addEventListener("click", async () => {
             const posts = document.getElementById("posts");
@@ -35,7 +36,7 @@ fetch("/api/auth", {
             const a = document.createElement("a");
             a.style.color = "#000";
             a.style["margin-bottom"] = "15px";
-            a.innerHTML = "&laquo;&nbsp;back";
+            a.innerHTML = `&laquo;&nbsp;${t["common-back"]}`;
             a.href = "javascript:window.location.reload();";
 
             posts.appendChild(a);
@@ -58,7 +59,7 @@ fetch("/api/auth", {
                     window.location.reload();
                 } catch(err) {
                     console.error(err);
-                    alert("The file could not be uploaded.");
+                    alert(t["common-upload-fail"]);
                 }
             });
 
@@ -70,8 +71,10 @@ fetch("/api/auth", {
 
             const submit = document.createElement("input");
             submit.type = "submit";
-            submit.value = "submit";
+            submit.value = t["common-submit"];
             form.appendChild(submit);
+
+            // ::file-selector-button needs to use i18n somehow
 
             posts.appendChild(form);
         });
@@ -109,12 +112,12 @@ fetch("/api/auth", {
 
             .then((data) => {
                 if (data.status === 200) {
-                    auth_status.textContent = "Authentication successful.";
+                    auth_status.textContent = t["auth-success"];
                     window.location.reload();
                 } else if (data.status === 500) {
-                    auth_status.textContent = "Internal server error. Please try again later.";
+                    auth_status.textContent = t["auth-fail-server"];
                 } else {
-                    auth_status.textContent = "Incorrect username or password.";
+                    auth_status.textContent = t["auth-fail-incorrect"];
                 }
             });
         });

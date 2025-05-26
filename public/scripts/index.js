@@ -1,6 +1,10 @@
-function add_posts(data) {
+const tr = i18n.load_translations().then(async () => {
+    return await i18n.translations;
+});
+
+async function add_posts(data) {
+    const t = await tr;
     const posts = document.getElementById("posts");
-    const parent = document.getElementById("parent");
     let current = 1;
     let current_search_tag = data.tag || "";
 
@@ -145,9 +149,7 @@ function add_posts(data) {
             display(current);
         });
     } else {
-        posts.textContent = current_search_tag ? 
-            `No results found for "${current_search_tag}"` : 
-            "No posts yet!";
+        posts.textContent = t["index-none"];
     }
 }
 
@@ -161,4 +163,10 @@ fetch("/api/posts?total=true")
 
 document.getElementById("logo").addEventListener("click", () => {
     window.location.href = "/";
+});
+
+i18n.load_translations().then(() => {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        el.innerHTML = i18n.t(el.dataset.i18n, el.dataset.i18nParams);
+    });
 });

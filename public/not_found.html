@@ -5,30 +5,26 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>choibooru</title>
-        <link rel="stylesheet" type="text/css" href="styles/main.css">
+        <link rel="stylesheet" type="text/css" href="/styles/main.css">
     </head>
     <body>
         <div id="parent">
             <div id="head-wrapper">
-                <img id="logo" src="assets/logo.png">
+                <img id="logo" src="/assets/logo.png">
                 <div id="headname">
                     <h2>
-                        choibooru
-                        <small style="font-size: 12px;">(running choibooru 0.1)</small>
+                        <span data-i18n="common-name"></span>
+                        <small style="font-size: 12px;" data-i18n="common-running" data-i18n-params='{"version":"0.1"}'></small>
                     </h2>
                     <div id="signin-status"></div>
                 </div>
-                <div id="search-bar">
-                    <input type="text" name="query" placeholder="search...">
-                    <button id="search-button" style="width: 40px;">&#x1F50E;&#xFE0E;</button>
-                </div>
                 <div id="sign-wrapper">
                     <form id="sign-form" style="display: none;">
-                        <label for="username">username:</label>
+                        <label for="username" data-i18n="common-username"></label>
                         <input type="text" name="username">
                         <input type="submit" value="sign in" id="signin-button">
                         <br><br>
-                        <label for="password">password:</label>
+                        <label for="password" data-i18n="common-password"></label>
                         <input type="password" name="password">
                         <input type="submit" value="sign up" id="signup-button">
                         <p id="auth-status"></p>
@@ -40,11 +36,14 @@
                 <div>
                     <h3>404</h3>
                     <br>
-                    <img src="assets/404.png" style="display: block; max-height: 200px;">
+                    <img src="/assets/404.png" style="display: block; max-height: 200px;">
                     <br>
-                    Couldn't find that page!
+                    <span data-i18n="not-found-404"></span>
                     <br><br>
-                    <a href="/" style="color: black;">&laquo; back to home</a>
+                    <a href="/" style="color: black;">
+                        &laquo;
+                        <span data-i18n="not-found-back"></span>
+                    </a>
                 </div>
             </div>
             <div id="footer">
@@ -53,5 +52,14 @@
                 <a href="https://github.com/meganekkogekirabu/choibooru">Source code</a>
             </div>
         </div>
+        <script src="/scripts/i18n.js"></script>
+        <script src="/scripts/auth.js"></script>
+        <script>
+            i18n.load_translations().then(() => {
+                document.querySelectorAll('[data-i18n]').forEach(el => {
+                    el.innerHTML = i18n.t(el.dataset.i18n, el.dataset.i18nParams);
+                });
+            });
+        </script>
     </body>
 </html>

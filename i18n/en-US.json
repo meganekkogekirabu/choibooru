@@ -1,0 +1,65 @@
+{
+    "auth-fail-incorrect": "Incorrect username or password.",
+
+    "auth-fail-server": "Internal server error. Please try again later.",
+    
+    "auth-success": "Authentication successful.",
+
+    "common-back": "back",
+
+    "common-log-out": "log out",
+    
+    "common-name": "choibooru",
+
+    "common-password": "password:",
+
+    "common-running": "(running choibooru {version})",
+
+    "common-sign-in": "sign in",
+
+    "common-signin-status": "You are currently signed in as {user}.",
+
+    "common-sign-up": "sign up",
+
+    "common-source": "Source code",
+
+    "common-submit": "submit",
+
+    "common-upload": "upload",
+
+    "common-upload-fail": "The file could not be uploaded.",
+
+    "common-username": "username:",
+
+    "index-none": "No posts yet!",
+
+    "index-search": "search...",
+
+    "not-found-404": "Couldn't find that page!",
+
+    "not-found-back": "back to home",
+
+    "post-date": "date uploaded:",
+
+    "post-delete": "delete",
+
+    "post-delete-confirm": "Are you sure you want to delete this post?",
+
+    "post-deleted": "This post has been deleted.",
+
+    "post-original-filename": "Original filename:",
+
+    "post-original-image": "original image",
+
+    "post-rating": "rating:",
+
+    "post-score": "score:",
+
+    "post-tags": "tags:",
+
+    "post-tagme": "tag me!",
+
+    "post-uploader": "uploader:",
+
+    "post-vote-warning": "You must be logged in to vote."
+}
