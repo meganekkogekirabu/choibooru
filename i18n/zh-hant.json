@@ -1,0 +1,65 @@
+{
+    "auth-fail-incorrect": "用戶名或密碼不正確。",
+
+    "auth-fail-server": "內部伺服器錯誤。請稍後再試。",
+    
+    "auth-success": "驗證成功。",
+
+    "common-back": "返回",
+
+    "common-log-out": "登出",
+    
+    "common-name": "蔡博鲁",
+
+    "common-password": "密碼：",
+
+    "common-running": "（使用蔡博鲁 {version}）",
+
+    "common-sign-in": "登录",
+
+    "common-signin-status": "您目前的登入帳號是 {user}。",
+
+    "common-sign-up": "创建账号",
+
+    "common-source": "源代碼",
+
+    "common-submit": "提交",
+
+    "common-upload": "上傳",
+
+    "common-upload-fail": "檔案無法上傳。",
+
+    "common-username": "用戶名：",
+
+    "index-none": "尚未發表文章！",
+
+    "index-search": "搜尋...",
+
+    "not-found-404": "無法找到該頁面！",
+
+    "not-found-back": "返回首頁",
+
+    "post-date": "上傳日期：",
+
+    "post-delete": "刪除",
+
+    "post-delete-confirm": "您確定要刪除這篇文章嗎？",
+
+    "post-deleted": "此文章已被刪除。",
+
+    "post-original-filename": "原始檔案名稱：",
+
+    "post-original-image": "原始圖片",
+
+    "post-rating": "評分：",
+
+    "post-score": "分數：",
+
+    "post-tags": "標簽：",
+
+    "post-tagme": "標示我！",
+
+    "post-uploader": "上傳者：",
+
+    "post-vote-warning": "您必須登入才能投票。"
+}
