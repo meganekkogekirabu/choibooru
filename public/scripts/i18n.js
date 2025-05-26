@@ -6,7 +6,7 @@ class i18n_service {
 
     async load_translations() {
         try {
-            const lang = navigator.language;
+            const lang = await fetch("/api/lang").then(response => response.json()).then(data => data.lang);
             const response = await fetch(`/api/translations?lang=${lang}`);
             this.translations = await response.json();
             this.current_lang = lang;

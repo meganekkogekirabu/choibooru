@@ -56,6 +56,23 @@ app.use(session({
     },
 }));
 
+const locales = {
+    "en"      : true,
+    "en-US"   : true,
+    "zh-hant" : true,
+}
+
+// middleware for setting locale
+app.use((req, _, next) => {
+    const lang =
+    req.host.split(".")[0] ??
+    req.headers["accept-language"];
+
+    req.session.lang = locales[lang] ? lang : "en";
+
+    next();
+});
+
 app.get("/", (_, res) => {
     res.sendFile(join(__dirname, "public", "index.html"));
 });
@@ -379,7 +396,19 @@ app.get("/api/translations", (req, res) => {
     const { lang } = req.query;
     const translations = require(`./i18n/${lang}.json`);
     res.json(translations);
-})
+});
+
+app.get("/api/lang", (req, res) => {
+    try {
+        res.json({
+            status : 200,
+            lang   : req.session.lang,
+        });
+    } catch(err) {
+        console.error(err);
+        res.status(500).send("An internal server error occurred.");
+    }
+});
 
 app.get(/^\/([^\.]+)(\..+)?/, (req, res) => {
     res.sendFile(join(__dirname, "public", req.params[0] + (req.params[1] || ".html")), (err) => {
