@@ -52,6 +52,8 @@ app.use(session({
 const locales = {
     "en"      : true,
     "en-US"   : true,
+    "zh"      : true,
+    "zh-hans" : true,
     "zh-hant" : true,
 }
 
