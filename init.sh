@@ -57,7 +57,7 @@ SESSION_KEY=""
 HOSTNAME=""
 PORT=0
 EOF
-    <<EOF
+    cat <<EOF
 $ENV created with default configuration
 set values for:
     SESSION_KEY
