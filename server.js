@@ -403,7 +403,7 @@ app.get("/api/lang", (req, res) => {
     }
 });
 
-app.get("/favicon.ico", (req, res) => {
+app.get("/favicon.ico", (_, res) => {
     res.sendFile(join(__dirname, "public", "assets", "favicon.ico"))
 })
 
