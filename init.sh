@@ -57,13 +57,18 @@ SESSION_KEY=""
 HOSTNAME=""
 PORT=0
 EOF
-    printf "\n$ENV created with default configuration\n"
-    printf "\nset values for:\n"
-    printf "  SESSION_KEY\n  HOSTNAME\n  PORT\n"
+    <<EOF
+$ENV created with default configuration
+set values for:
+    SESSION_KEY
+    HOSTNAME
+    PORT
+EOF
     sleep 5
     exit 1
 else
-    printf "\n\nstarting in $MODE mode\n"
+    echo
+    echo "starting in $MODE mode"
     set -a && source $ENV && set +a
     exec node -r dotenv/config server.js dotenv_config_path=$ENV
 fi
