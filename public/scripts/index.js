@@ -150,6 +150,7 @@ async function add_posts(data) {
         });
     } else {
         posts.textContent = t["index-none"];
+        posts.lang = i18n.current_lang;
     }
 }
 
@@ -168,5 +169,6 @@ document.getElementById("logo").addEventListener("click", () => {
 i18n.load_translations().then(() => {
     document.querySelectorAll('[data-i18n]').forEach(el => {
         el.innerHTML = i18n.t(el.dataset.i18n, el.dataset.i18nParams);
+        el.lang = i18n.current_lang;
     });
 });

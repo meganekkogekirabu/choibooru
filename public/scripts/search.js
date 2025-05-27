@@ -1,6 +1,7 @@
 const search_input = document.querySelector("[name=query]");
 
 (async () => {
+    search_input.lang = i18n.current_lang
     search_input.placeholder = await i18n.load_translations().then(async () => {
         return await i18n.translations["index-search"]
     });

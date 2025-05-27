@@ -9,12 +9,14 @@ fetch("/api/auth", {
     if (data.username) {
         const signin_status = document.getElementById("signin-status");
         signin_status.innerHTML = `<br><br>${t["common-signin-status"].replace("{user}", `<span style="color: #F16;">${data.username}</span>`)}`;
+        signin_status.lang = i18n.current_lang;
 
         const sign_wrapper = document.getElementById("sign-wrapper");
         sign_wrapper.innerHTML = "";
 
         const logout = document.createElement("button");
         logout.textContent = t["common-log-out"];
+        logout.lang = i18n.current_lang;
 
         logout.addEventListener("click", async () => {
             await fetch("/api/logout", {
@@ -27,6 +29,7 @@ fetch("/api/auth", {
 
         const upload = document.createElement("button");
         upload.textContent = t["common-upload"];
+        upload.lang = i18n.current_lang;
 
         upload.addEventListener("click", async () => {
             const posts = document.getElementById("posts");
@@ -37,6 +40,7 @@ fetch("/api/auth", {
             a.style.color = "#000";
             a.style["margin-bottom"] = "15px";
             a.innerHTML = `&laquo;&nbsp;${t["common-back"]}`;
+            a.lang = i18n.current_lang;
             a.href = "javascript:window.location.reload();";
 
             posts.appendChild(a);
@@ -72,6 +76,7 @@ fetch("/api/auth", {
             const submit = document.createElement("input");
             submit.type = "submit";
             submit.value = t["common-submit"];
+            submit.lang = i18n.current_lang;
             form.appendChild(submit);
 
             // ::file-selector-button needs to use i18n somehow
@@ -85,7 +90,13 @@ fetch("/api/auth", {
         sign_form.style.display = "unset";
 
         const signin_button = document.getElementById("signin-button");
+        signin_button.value = t["common-sign-in"];
+        signin_button.lang = i18n.current_lang;
+
         const signup_button = document.getElementById("signup-button");
+        signup_button.value = t["common-sign-up"];
+        signup_button.lang = i18n.current_lang;
+
         const auth_status = document.getElementById("auth-status");
 
         signin_button.addEventListener("click", async (event) => {
@@ -113,11 +124,14 @@ fetch("/api/auth", {
             .then((data) => {
                 if (data.status === 200) {
                     auth_status.textContent = t["auth-success"];
+                    auth_status.lang = i18n.current_lang;
                     window.location.reload();
                 } else if (data.status === 500) {
                     auth_status.textContent = t["auth-fail-server"];
+                    auth_status.lang = i18n.current_lang;
                 } else {
                     auth_status.textContent = t["auth-fail-incorrect"];
+                    auth_status.lang = i18n.current_lang;
                 }
             });
         });

@@ -16,6 +16,7 @@ fetch(`/api/src${window.location.search}`, {
     if (data.deleted === 1) {
         const p = document.createElement("p");
         p.innerHTML = `${t["post-deleted"]}<br><br>${t["post-original-filename"]} ${data.src}`;
+        p.lang = i18n.current_lang;
         posts.appendChild(p);
     } else {
         const figure = document.createElement("figure");
@@ -44,6 +45,7 @@ fetch(`/api/src${window.location.search}`, {
             .then(async authdata => {
                 if (!authdata.username) {
                     status.textContent = t["post-vote-warning"];
+                    status.lang = i18n.current_lang;
                 } else {
                     await fetch("/api/vote", {
                         method  : "POST",
@@ -71,6 +73,7 @@ fetch(`/api/src${window.location.search}`, {
             .then(async data => {
                 if (!data.username) {
                     status.textContent = t["post-vote-warning"];
+                    status.lang = i18n.current_lang;
                 } else {
                     await fetch("/api/vote", {
                         method  : "POST",
@@ -103,16 +106,19 @@ fetch(`/api/src${window.location.search}`, {
         const a = document.createElement("a");
         a.href = data.src;
         a.innerHTML = `${t["post-original-image"]} &raquo;<br><br>`;
+        a.lang = i18n.current_lang;
         a.target = "_blank";
         sidebar.appendChild(a);
     }
 
     const score = document.createElement("p");
     score.innerHTML = `${t["post-score"]} ${data.score}`;
+    score.lang = i18n.current_lang;
     sidebar.appendChild(score);
 
     const tag_head = document.createElement("p")
     tag_head.innerHTML = `<br>${t["post-tags"]}`;
+    tag_head.lang = i18n.current_lang;
 
     const tags = document.createElement("ul");
     tags.style.padding = "10px";
@@ -120,6 +126,7 @@ fetch(`/api/src${window.location.search}`, {
     if (!data.tags) {
         const li = document.createElement("li");
         li.textContent = t["post-tagme"];
+        li.lang = i18n.current_lang;
         tags.appendChild(li);
     } else {
         const _tags = data.tags.match(/[^,]+/g)?.filter(Boolean) || [];
@@ -202,10 +209,12 @@ fetch(`/api/src${window.location.search}`, {
             if (data.deleted === 1) {
                 const rating = document.createElement("p");
                 rating.innerHTML = `<br>${t["post-rating"]} ${data.rating ?? "general"}`;
+                rating.lang = i18n.current_lang;
                 score.after(rating);
             } else {
                 const label = document.createElement("label");
                 label.textContent = t["post-rating"];
+                label.lang = i18n.current_lang;
                 label.for = "rating";
 
                 score.after(label);
@@ -257,6 +266,7 @@ fetch(`/api/src${window.location.search}`, {
                     if (authdata.is_admin) {
                         const button = document.createElement("button")
                         button.textContent = t["post-delete"];
+                        button.lang = i18n.current_lang;
                         button.style["margin-top"] = "15px";
                         button.addEventListener("click", async () => {
                             if (confirm(t["post-delete-confirm"])) {
@@ -280,16 +290,19 @@ fetch(`/api/src${window.location.search}`, {
         } else {
             const rating = document.createElement("p");
             rating.innerHTML = `<br>${t["post-rating"]} ${data.rating}`;
+            rating.lang = i18n.current_lang;
             score.after(rating);
         }
     });
 
     const uploader = document.createElement("p");
     uploader.innerHTML = `<br>${t["post-uploader"]} ${data.uploader}`;
+    uploader.lang = i18n.current_lang;
     sidebar.appendChild(uploader);
 
     const date = document.createElement("p");
     date.innerHTML = `<br>${t["post-date"]} ${new Date(data.date).toLocaleDateString()}`;
+    date.lang = i18n.current_lang;
     sidebar.appendChild(date);
 
     sidebar.appendChild(tag_head);
@@ -303,5 +316,6 @@ document.getElementById("logo").addEventListener("click", () => {
 i18n.load_translations().then(() => {
     document.querySelectorAll('[data-i18n]').forEach(el => {
         el.innerHTML = i18n.t(el.dataset.i18n, el.dataset.i18nParams);
+        el.lang = i18n.current_lang;
     });
 });
