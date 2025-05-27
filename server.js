@@ -15,8 +15,8 @@ import { createRequire } from "module";
 
 const require = createRequire(import.meta.url); // for loading i18n json
 
-const port = process.argv[3] ?? 3000;
-const hostname = process.argv[2] ?? "127.0.0.1";
+const port = process.env.HTTP_PORT;
+const hostname = process.env.HTTP_HOSTNAME;
 
 const app = express();
 

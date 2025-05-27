@@ -1,5 +1,8 @@
 #!/bin/bash
 
+MODE=${1:-dev}
+ENV=".$MODE.env"
+
 exec > >(tee init.sh.log) 2>&1
 
 # check if node is already running
@@ -48,19 +51,19 @@ sqlite3 booru.db <<EOF
 .quit
 EOF
 
-if [ ! -f ".env" ]; then
-    cat > ".env" <<EOF
+if [ ! -f "$ENV" ]; then
+    cat > "$ENV" <<EOF
 SESSION_KEY=""
 HOSTNAME=""
 PORT=0
 EOF
-    printf "\n.env created with default configuration\n"
+    printf "\n$ENV created with default configuration\n"
     printf "\nset values for:\n"
     printf "  SESSION_KEY\n  HOSTNAME\n  PORT\n"
     sleep 5
     exit 1
 else
-    echo
-    set -a && source .env && set +a
-    exec node server.js "$HOSTNAME" "$PORT"
+    printf "\n\nstarting in $MODE mode\n"
+    set -a && source $ENV && set +a
+    exec node -r dotenv/config server.js dotenv_config_path=$ENV
 fi

@@ -1,5 +1,5 @@
 public/assets
 node_modules
 *.db
-.env
+*.env
 *.log
