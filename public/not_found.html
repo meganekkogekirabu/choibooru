@@ -47,9 +47,12 @@
                 </div>
             </div>
             <div id="footer">
-                choibooru v0.1 &mdash; 2025
-                <br>
-                <a href="https://github.com/meganekkogekirabu/choibooru">Source code</a>
+                <div id="footer-left">
+                    <span data-i18n="common-name"></span> v0.1 &mdash; 2025
+                    <br>
+                    <a href="https://github.com/meganekkogekirabu/choibooru" data-i18n="common-source"></a>
+                </div>
+                <div id="footer-right"></div>
             </div>
         </div>
         <script src="/scripts/i18n.js"></script>
@@ -58,6 +61,7 @@
             i18n.load_translations().then(() => {
                 document.querySelectorAll('[data-i18n]').forEach(el => {
                     el.innerHTML = i18n.t(el.dataset.i18n, el.dataset.i18nParams);
+                    el.lang = i18n.current_lang;
                 });
             });
         </script>

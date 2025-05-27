@@ -171,4 +171,17 @@ i18n.load_translations().then(() => {
         el.innerHTML = i18n.t(el.dataset.i18n, el.dataset.i18nParams);
         el.lang = i18n.current_lang;
     });
+
+    if (i18n.current_lang !== "en") {
+        const footer_right = document.getElementById("footer-right");
+        const move_en = document.createElement("p");
+        move_en.innerHTML = "English";
+        move_en.style.cursor = "pointer";
+
+        move_en.addEventListener("click", () => {
+            window.location.href = window.location.href.replace(/(?<=^http:\/\/)[^.]+\./, "")
+        });
+
+        footer_right.appendChild(move_en);
+    }
 });

@@ -120,6 +120,8 @@ input:not([type=submit]) {
 #footer {
     background-color: aliceblue;
     grid-area: 5 / 1 / 6 / 8;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
 }
 
 #posts {
@@ -215,4 +217,8 @@ label {
 [lang=zh-hant],
 [lang=zh-hans] {
     font-family: sans-serif;
+}
+
+#footer-right {
+    text-align: right;
 }
