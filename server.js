@@ -10,7 +10,6 @@ import "dotenv/config";
 import sharp from "sharp";
 import multer from "multer";
 import { unlink } from "node:fs";
-import favicon from "serve-favicon";
 import { createRequire } from "module";
 
 const require = createRequire(import.meta.url); // for loading i18n json
@@ -36,12 +35,6 @@ const upload = multer({
 });
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-
-try {
-    app.use(favicon(join(__dirname, "public", "assets", "favicon.ico")));
-} catch(err) {
-    console.error("serve-favicon middleware failed to get favicon");
-}
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -409,6 +402,10 @@ app.get("/api/lang", (req, res) => {
         res.status(500).send("An internal server error occurred.");
     }
 });
+
+app.get("/favicon.ico", (req, res) => {
+    res.sendFile(join(__dirname, "public", "assets", "favicon.ico"))
+})
 
 app.get(/^\/([^\.]+)(\..+)?/, (req, res) => {
     res.sendFile(join(__dirname, "public", req.params[0] + (req.params[1] || ".html")), (err) => {
