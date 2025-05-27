@@ -325,10 +325,21 @@ app.post("/api/search", async (req, res) => {
         const params = [`%,${tag},%`];
 
         if (total) {
-            const count = await database.get(`
-                SELECT COUNT(*) as count FROM posts WHERE tags LIKE ?
+            const all_posts = await database.all(`
+                SELECT * FROM posts WHERE tags LIKE ?
             `, params);
-            return res.json({ total: count.count, tag: tag });
+
+            let filtered_posts = [];
+
+            for (const post of all_posts) {
+                if ((post.rating === "explicit" || post.deleted === 1) && (!req.session.is_full || !req.session.username)) {
+                    continue;
+                } else {
+                    filtered_posts.push(post);
+                }
+            }
+
+            return res.json({ total: filtered_posts.length, tag: tag });
         }
 
         const page_offset = parseInt(offset) || 0;

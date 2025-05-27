@@ -7,17 +7,9 @@ async function add_posts(data) {
     const posts = document.getElementById("posts");
     let current = 1;
     let current_search_tag = data.tag || "";
-
-    function calculate_chunk_size() {
-        const viewport_width = window.innerWidth;
-        const post_width = 300;
-        const posts_container_width = (viewport_width * 6) / 7;
-        const posts_per_row = Math.max(1, Math.floor(posts_container_width / post_width));
-        return posts_per_row * 2;
-    }
-
-    let chunk = calculate_chunk_size();
-    let total = Math.ceil(data.total / chunk);
+    
+    const chunk = 14;
+    const total = Math.ceil(data.total / chunk);
     
     function display(page) {
         posts.innerHTML = "";
@@ -32,9 +24,9 @@ async function add_posts(data) {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    tag: current_search_tag,
-                    offset: start,
-                    limit: chunk
+                    tag    : current_search_tag,
+                    offset : start,
+                    limit  : chunk
                 }),
             })
             .then(response => response.json())
@@ -87,13 +79,6 @@ async function add_posts(data) {
         pagination.style.marginTop = "20px";
         posts.after(pagination);
 
-        const new_chunk = calculate_chunk_size();
-        if (new_chunk !== chunk) {
-            chunk = new_chunk;
-            total = Math.ceil(data.total / chunk);
-            current = Math.min(current, total);
-        }
-
         const first_button = document.createElement("button");
         first_button.textContent = "<<";
         first_button.disabled = current === 1;
@@ -144,10 +129,6 @@ async function add_posts(data) {
 
     if (data.total) {
         display(1);
-        
-        window.addEventListener("resize", () => {
-            display(current);
-        });
     } else {
         posts.textContent = t["index-none"];
         posts.lang = i18n.current_lang;

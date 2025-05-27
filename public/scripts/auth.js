@@ -1,3 +1,5 @@
+let auth_ready = new Promise((res) => {
+
 fetch("/api/auth", {
     method : "POST",
 })
@@ -166,4 +168,6 @@ fetch("/api/auth", {
             });
         });
     }
-});
+    res();
+})  // /api/auth data
+}); // promise

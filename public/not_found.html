@@ -57,12 +57,21 @@
         </div>
         <script src="/scripts/i18n.js"></script>
         <script src="/scripts/auth.js"></script>
+        <script src="scripts/mobile.js"></script>
         <script>
             i18n.load_translations().then(() => {
                 document.querySelectorAll('[data-i18n]').forEach(el => {
                     el.innerHTML = i18n.t(el.dataset.i18n, el.dataset.i18nParams);
                     el.lang = i18n.current_lang;
                 });
+            });
+
+            const tr = i18n.load_translations().then(async () => {
+                return await i18n.translations;
+            });
+
+            document.getElementById("logo").addEventListener("click", () => {
+                window.location.href = "/";
             });
         </script>
     </body>

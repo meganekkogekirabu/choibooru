@@ -2,6 +2,8 @@ const tr = i18n.load_translations().then(async () => {
     return await i18n.translations;
 });
 
+let post_ready = new Promise((res) => {
+
 fetch(`/api/src${window.location.search}`, {
     method : "GET",
 })
@@ -319,3 +321,7 @@ i18n.load_translations().then(() => {
         el.lang = i18n.current_lang;
     });
 });
+
+res();
+
+}); // promise
