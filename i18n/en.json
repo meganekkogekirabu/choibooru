@@ -1,65 +1,65 @@
 {
-    "auth-fail-incorrect": "Incorrect username or password.",
+    "auth-fail-incorrect": "Usuario o contraseña incorrectos.",
 
-    "auth-fail-server": "Internal server error. Please try again later.",
+    "auth-fail-server": "Error interno del servidor. Por favor inténtalo más tarde.",
     
-    "auth-success": "Authentication successful.",
+    "auth-success": "Validación exitosa.",
 
-    "common-back": "back",
+    "common-back": "atrás",
 
-    "common-log-out": "log out",
+    "common-log-out": "cerrar sesión",
     
     "common-name": "choibooru",
 
-    "common-password": "password:",
+    "common-password": "contraseña:",
 
-    "common-running": "(running choibooru {version})",
+    "common-running": "(ejecutando choibooru {version})",
 
-    "common-sign-in": "sign in",
+    "common-sign-in": "acceder",
 
-    "common-signin-status": "You are currently signed in as {user}.",
+    "common-signin-status": "Actualmente estás conectad@ como {user}.",
 
-    "common-sign-up": "sign up",
+    "common-sign-up": "unirse",
 
-    "common-source": "Source code",
+    "common-source": "Código fuente",
 
-    "common-submit": "submit",
+    "common-submit": "enviar",
 
-    "common-upload": "upload",
+    "common-upload": "subir",
 
-    "common-upload-fail": "The file could not be uploaded.",
+    "common-upload-fail": "El archivo no pudo ser subido.",
 
-    "common-username": "username:",
+    "common-username": "usuario:",
 
-    "index-none": "No posts yet!",
+    "index-none": "¡Aún no hay publicaciones!",
 
-    "index-search": "search...",
+    "index-search": "buscar...",
 
-    "not-found-404": "Couldn't find that page!",
+    "not-found-404": "¡No pudo encontrarse esta página!",
 
-    "not-found-back": "back to home",
+    "not-found-back": "regresar a la página principal",
 
-    "post-date": "date uploaded:",
+    "post-date": "fecha de publicación:",
 
-    "post-delete": "delete",
+    "post-delete": "eliminar",
 
-    "post-delete-confirm": "Are you sure you want to delete this post?",
+    "post-delete-confirm": "¿Estás segur@ de que quieres eliminar esta publicación?",
 
-    "post-deleted": "This post has been deleted.",
+    "post-deleted": "Esta publicación ha sido eliminada.",
 
-    "post-original-filename": "Original filename:",
+    "post-original-filename": "Nombre original:",
 
-    "post-original-image": "original image",
+    "post-original-image": "imagen original",
 
-    "post-rating": "rating:",
+    "post-rating": "calificación:",
 
-    "post-score": "score:",
+    "post-score": "puntaje:",
 
-    "post-tags": "tags:",
+    "post-tags": "etiquetas:",
 
-    "post-tagme": "tag me!",
+    "post-tagme": "¡etiquétame!",
 
-    "post-uploader": "uploader:",
+    "post-uploader": "publicado por:",
 
-    "post-vote-warning": "You must be logged in to vote."
+    "post-vote-warning": "Debes iniciar sesión para votar."
 }
