@@ -1,0 +1,65 @@
+{
+    "auth-fail-incorrect": "Usuario o contraseña incorrectos.",
+
+    "auth-fail-server": "Error interno del servidor. Por favor inténtalo más tarde.",
+    
+    "auth-success": "Validación exitosa.",
+
+    "common-back": "atrás",
+
+    "common-log-out": "cerrar sesión",
+    
+    "common-name": "choibooru",
+
+    "common-password": "contraseña:",
+
+    "common-running": "(ejecutando choibooru {version})",
+
+    "common-sign-in": "acceder",
+
+    "common-signin-status": "Actualmente estás conectad@ como {user}.",
+
+    "common-sign-up": "unirse",
+
+    "common-source": "Código fuente",
+
+    "common-submit": "enviar",
+
+    "common-upload": "subir",
+
+    "common-upload-fail": "El archivo no pudo ser subido.",
+
+    "common-username": "usuario:",
+
+    "index-none": "¡Aún no hay publicaciones!",
+
+    "index-search": "buscar...",
+
+    "not-found-404": "¡No pudo encontrarse esta página!",
+
+    "not-found-back": "regresar a la página principal",
+
+    "post-date": "fecha de publicación:",
+
+    "post-delete": "eliminar",
+
+    "post-delete-confirm": "¿Estás segur@ de que quieres eliminar esta publicación?",
+
+    "post-deleted": "Esta publicación ha sido eliminada.",
+
+    "post-original-filename": "Nombre original:",
+
+    "post-original-image": "imagen original",
+
+    "post-rating": "calificación:",
+
+    "post-score": "puntaje:",
+
+    "post-tags": "etiquetas:",
+
+    "post-tagme": "¡etiquétame!",
+
+    "post-uploader": "publicado por:",
+
+    "post-vote-warning": "Debes iniciar sesión para votar."
+}
