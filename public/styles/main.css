@@ -348,4 +348,12 @@ label {
         height: fit-content;
         margin: 20px 0;
     }
+    
+    #menu>#posts>* {
+        max-width: 350px;
+    }
+    
+    #menu [type=submit] {
+        margin-top: 10px;
+    }
 }

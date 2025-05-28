@@ -1,3 +1,5 @@
+let mobile_ready = new Promise((res) => {
+
 if (screen.width < 1090) {
     const sign_wrapper = document.getElementById("sign-wrapper");
     const search_bar = document.getElementById("search-bar");
@@ -20,7 +22,7 @@ if (screen.width < 1090) {
             signin_status.remove();
         });
 
-        if (post_ready) {
+        if (typeof post_ready !== "undefined") {
             await post_ready
             .then(() => {
                 sidebar.remove();
@@ -48,11 +50,15 @@ if (screen.width < 1090) {
 
         sidebar.style.display = "unset";
 
+        const posts = document.createElement("div");
+        posts.id = "posts";
+
         menu.appendChild(close_menu);
         menu.appendChild(logo.cloneNode(true));
         menu.appendChild(sign_wrapper);
         menu.appendChild(signin_status);
         menu.appendChild(sidebar);
+        menu.appendChild(posts);
 
         const parent = document.getElementById("parent");
         parent.replaceWith(menu);
@@ -110,3 +116,5 @@ if (screen.width < 1090) {
         }
     });
 }
+
+}); // promise
