@@ -125,6 +125,8 @@ fetch(`/api/src${window.location.search}`, {
     const tags = document.createElement("ul");
     tags.style.padding = "10px";
 
+    const tag_removes = [] // since querySelector for .tag later doesn't work on mobile, store a.tag[data-target=...] here
+
     if (!data.tags) {
         const li = document.createElement("li");
         li.textContent = t["post-tagme"];
@@ -135,8 +137,9 @@ fetch(`/api/src${window.location.search}`, {
         _tags.forEach((tag) => {
             const li = document.createElement("li");
             const a = document.createElement("a");
-            a.classList.add("tag");
+            a.className = "tag";
             a.dataset.target = tag;
+            tag_removes.push(a);
 
             li.textContent = tag;
             li.appendChild(a);
@@ -187,7 +190,7 @@ fetch(`/api/src${window.location.search}`, {
 
                 sidebar.appendChild(form);
 
-                document.querySelectorAll(".tag").forEach(tag => {
+                tag_removes.forEach(tag => {
                     tag.innerHTML = "&nbsp;-";
                     tag.style.cursor = "pointer";
                     
