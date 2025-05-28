@@ -37,6 +37,7 @@ sqlite3 booru.db <<EOF
         "rating" VARCHAR(20) CHECK("rating" IN ('general', 'sensitive', 'questionable', 'explicit')),
         "tags" TEXT,
         "deleted" BOOL DEFAULT 0 CHECK("deleted" IN (0, 1)),
+        "source" TEXT,
         PRIMARY KEY("id" AUTOINCREMENT)
     );
 

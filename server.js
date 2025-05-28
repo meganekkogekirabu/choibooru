@@ -183,11 +183,15 @@ app.get("/api/posts", async (req, res) => {
 
 app.post("/api/upload", upload.single("post"), async (req, res) => {
     if (!req.session.username) {
-        return res.status(403).send("Not authorised.");
-    }
-
-    if (!req.file) {
-        return res.status(400).send("An image must be provided.");
+        return res.json({
+            status : 403,
+            error  : "Not authorised.",
+        });
+    } else if (!req.file) {
+        return res.json({
+            status : 400,
+            error  : "Bad request.",
+        });
     }
 
     try {
@@ -202,9 +206,12 @@ app.post("/api/upload", upload.single("post"), async (req, res) => {
             INSERT INTO posts (src, uploader, date) VALUES (?, ?, ?);
         `, [src, req.session.username, date]);
 
-        res.status(200).send("Successfully uploaded.");
+        res.sendStatus(200);
     } catch(err) {
-        res.status(500).send("An internal server error occurred.");
+        res.json({
+            status : 500,
+            error  : "An internal server error occurred.",
+        });
     }
 });
 
@@ -212,7 +219,10 @@ app.get("/api/src", async (req, res) => {
     const { id } = req.query;
 
     if (!id) {
-        return res.status(400).send("?id= is required.");
+        res.json({
+            status : 400,
+            error  : "Bad request.",
+        });
     }
 
     try {
@@ -221,7 +231,10 @@ app.get("/api/src", async (req, res) => {
         `, [id]));
     } catch(err) {
         console.error(err);
-        res.status(500).send("An internal server error occurred.");
+        res.json({
+            status : 500,
+            error  : "An internal server error occurred.",
+        });
     }
 });
 
@@ -230,10 +243,15 @@ app.post("/api/vote", async (req, res) => {
     const voters = _row.voters;
 
     if (!req.session.username || (voters?.includes("," + req.session.username + ",") ?? false)) {
-        return res.status(403).send("Not authorised.");
-
+        return res.json({
+            status : 403,
+            error  : "Not authorised.",
+        });
     } else if (Math.abs(req.body.dir) !== 1) {
-        return res.status(400).send("Invalid request.");
+        return res.json({
+            status : 400,
+            error  : "Bad request.",
+        });
     }
 
     try {
@@ -245,16 +263,29 @@ app.post("/api/vote", async (req, res) => {
             UPDATE posts SET score = score + ? WHERE id = ?;
         `, [req.body.dir, req.body.id]);
 
-        res.status(200).send("Successfully voted.");
+        res.sendStatus(200);
     } catch(err) {
         console.error(err);
-        res.status(500).send("An internal server error occurred.");
+        res.json({
+            status : 500,
+            error  : "An internal server error occurred.",
+        });
     }
 });
 
 app.post("/api/tag/add", async (req, res) => {
+    const { tag, id } = req.body;
+
     if (!req.session.username) {
-        return res.status(403).send("Not authorised.");
+        res.json({
+            status : 403,
+            error  : "Not authorised.",
+        });
+    } else if (!tag || !id) {
+        res.json({
+            status : 400,
+            error  : "Bad request.",
+        });
     }
 
     try {
@@ -265,38 +296,63 @@ app.post("/api/tag/add", async (req, res) => {
                 UPDATE posts SET tags = CONCAT(tags, ",", ?, ",") WHERE id = ?;
             `, [req.body.tag, req.body.id]);
 
-            res.status(200).send("Tagging successful.");
+            res.sendStatus(200);
         } else {
-            res.status(400).send("The specified tag is already applied to this post.");
+            res.json({
+                status : 400,
+                error  : "The specified tag is already applied to this post.",
+            });
         }
     } catch(err) {
         console.error(err);
-        res.status(500).send("An internal server error occurred.");
+        res.json({
+            status : 500,
+            error  : "An internal server error occurred.",
+        });
     }
 });
 
 app.post("/api/tag/remove", async (req, res) => {
+    const { tag, id } = req.body;
+
     if (!req.session.username) {
-        return res.status(403).send("Not authorised.");
+        res.json({
+            status : 403,
+            error  : "Not authorised.",
+        });
+    } else if (!tag || !id) {
+        res.json({
+            status : 400,
+            error  : "Bad request.",
+        });
     }
 
     try {
         await database.run(`
             UPDATE posts SET tags = REPLACE(tags, CONCAT(",", ?, ","), "") WHERE id = ?;
-        `, [req.body.tag, req.body.id]);
+        `, [tag, id]);
 
-        res.status(200).send("Tagging successful.");
+        res.sendStatus(200);
     } catch(err) {
         console.error(err);
-        res.status(500).send("An internal server error occurred.");
+        res.json({
+            status : 500,
+            error  : "An internal server error occurred.",
+        });
     }
 });
 
 app.post("/api/rate", async (req, res) => {
     if (!req.session.username) {
-        return res.status(403).send("Not authorised.");
+        return res.json({
+            status : 403,
+            error  : "Not authorised.",
+        });
     } else if (!req.body.rating || !req.body.id) {
-        return res.status(400).send("Bad request.");
+        return res.json({
+            status : 400,
+            error  : "Bad request.",
+        });
     }
 
     try {
@@ -307,7 +363,10 @@ app.post("/api/rate", async (req, res) => {
         res.status(200).send("Tagging successful.");
     } catch(err) {
         console.error(err);
-        res.status(500).send("An internal server error occurred.");
+        res.json({
+            status : 500,
+            error  : "An internal server error occurred.",
+        });
     }
 });
 
@@ -316,7 +375,10 @@ app.post("/api/search", async (req, res) => {
         const { tag, offset, limit, total } = req.body;
 
         if (!tag || typeof tag !== "string") {
-            return res.status(400).send("Bad request.");
+            return res.json({
+                status : 400,
+                error  : "Bad request.",
+            });
         }
 
         let query = `
@@ -362,16 +424,25 @@ app.post("/api/search", async (req, res) => {
 
     } catch(err) {
         console.error(err);
-        res.status(500).send("An internal server error occurred.");
+        res.json({
+            status : 500,
+            error  : "An internal server error occurred.",
+        });
     }
 });
 
 app.post("/api/delete", async (req, res) => {
     try {
         if (!req.session.is_admin) {
-            return res.status(403).send("Not authorised.");
+            return res.json({
+                status : 403,
+                error  : "Not authorised.",
+            });
         } else if (!req.body.id) {
-            return res.status(400).send("Bad request.");
+            return res.json({
+                status : 400,
+                error  : "Bad request.",
+            });
         }
 
         const _row = await database.get(`
@@ -387,14 +458,20 @@ app.post("/api/delete", async (req, res) => {
         unlink(join(__dirname, "public", src), (err) => {
             if (err) {
                 console.error(err);
-                return res.status(500).send("An internal server error occurred.");
+                return res.json({
+                    status : 500,
+                    error  : "An internal server error occurred.",
+                });
             }
         });
 
-        res.status(200).send("Successfully deleted.");
+        res.sendStatus(200);
     } catch(err) {
         console.error(err);
-        res.status(500).send("An internal server error occurred.");
+        res.json({
+            status : 500,
+            error  : "An internal server error occurred.",
+        });
     }
 });
 
@@ -412,12 +489,48 @@ app.get("/api/lang", (req, res) => {
         });
     } catch(err) {
         console.error(err);
-        res.status(500).send("An internal server error occurred.");
+        res.json({
+            status : 500,
+            error  : "An internal server error occurred.",
+        });
     }
 });
 
 app.get("/favicon.ico", (_, res) => {
     res.sendFile(join(__dirname, "public", "assets", "favicon.ico"))
+})
+
+app.post("/api/source", async (req, res) => {
+    const { id, source } = req.body;
+
+    // https://regexr.com/39nr7
+    const valid_url = source.match(/^[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)$/mi);
+
+    if (!req.session.username) {
+        res.json({
+            status : 403,
+            error  : "Not authorised.",
+        });
+    } else if (!id || !source || !valid_url) {
+        res.json({
+            status : 400,
+            error  : "Bad request.",
+        });
+    }
+
+    try {
+        await database.run(`
+            UPDATE posts SET source = ? WHERE id = ?;
+        `, [id, source]);
+
+        res.sendStatus(200);
+    } catch(err) {
+        console.error(err);
+        res.json({
+            status : 500,
+            error  : "An internal server error occurred.",
+        });
+    }
 })
 
 app.get(/^\/([^\.]+)(\..+)?/, (req, res) => {
