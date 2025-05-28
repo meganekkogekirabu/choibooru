@@ -54,16 +54,16 @@ EOF
 if [ ! -f "$ENV" ]; then
     cat > "$ENV" <<EOF
 SESSION_KEY=""
-HOSTNAME=""
-PORT=0
+HTTP_HOSTNAME=""
+HTTP_PORT=0
 EOF
     echo
     cat <<EOF
 $ENV created with default configuration
 set values for:
     SESSION_KEY
-    HOSTNAME
-    PORT
+    HTTP_HOSTNAME
+    HTTP_PORT
 EOF
     sleep 5
     exit 1
