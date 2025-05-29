@@ -52,6 +52,7 @@ app.use(session({
 const locales = {
     "en"      : true,
     "en-US"   : true,
+    "es"      : true,
     "zh"      : true,
     "zh-hans" : true,
     "zh-hant" : true,
@@ -507,12 +508,12 @@ app.post("/api/source", async (req, res) => {
     const valid_url = source.match(/^[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)$/mi);
 
     if (!req.session.username) {
-        res.json({
+        return res.json({
             status : 403,
             error  : "Not authorised.",
         });
     } else if (!id || !source || !valid_url) {
-        res.json({
+        return res.json({
             status : 400,
             error  : "Bad request.",
         });
