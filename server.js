@@ -52,6 +52,15 @@ app.use(session({
     },
 }));
 
+// redirect http to https
+app.use((req, res, next) => {
+    if (process.env.ENVIRONMENT === "prod" && !req.secure) {
+        return res.redirect("https://" + req.headers.host + req.url);
+    }
+
+    next();
+})
+
 const locales = {
     "en"      : true,
     "en-US"   : true,
@@ -515,14 +524,30 @@ app.get(/^\/([^\.]+)(\..+)?/, (req, res) => {
 });
 
 const options = {
-  key  : readFileSync('private-key.pem'),
-  cert : readFileSync('certificate.pem'),
+  key  : readFileSync('./keys/private-key.pem'),
+  cert : readFileSync('./keys/certificate.pem'),
 };
 
-http.createServer(app).listen(http_port, hostname, () => {
-    console.log(`server running at http://${hostname}:${http_port}`);
+https.createServer(options, app).listen(https_port, hostname, () => {
+    console.log(`HTTPS server running at https://${hostname}:${https_port}`);
 });
 
-https.createServer(options, app).listen(https_port, hostname, () => {
-    console.log(`server running at https://${hostname}:${https_port}`);
-});
+// redirect HTTP to HTTPS in production
+if (process.env.ENVIRONMENT === "prod") {
+    const httpApp = express();
+
+    httpApp.use((req, res, next) => {
+        if (!req.secure) {
+            return res.redirect(301, `https://${req.headers.host.replace(http_port, https_port)}${req.url}`);
+        }
+        next();
+    });
+
+    http.createServer(httpApp).listen(http_port, hostname, () => {
+        console.log(`HTTP redirect server running at http://${hostname}:${http_port}`);
+    });
+} else {
+    http.createServer(app).listen(http_port, hostname, () => {
+        console.log(`HTTP server running at http://${hostname}:${http_port}`);
+    });
+}
