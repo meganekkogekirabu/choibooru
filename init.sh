@@ -13,6 +13,7 @@ fi
 
 npm install
 mkdir -p public/assets/posts
+mkdir -p keys
 
 declare -a assets=(
     "public/assets/logo.png"
@@ -57,6 +58,8 @@ if [ ! -f "$ENV" ]; then
 SESSION_KEY=""
 HTTP_HOSTNAME=""
 HTTP_PORT=0
+HTTPS_PORT=0
+ENVIRONMENT="$MODE"
 EOF
     echo
     cat <<EOF
@@ -65,12 +68,15 @@ set values for:
     SESSION_KEY
     HTTP_HOSTNAME
     HTTP_PORT
+    HTTPS_PORT
 EOF
     sleep 5
     exit 1
 else
     echo
     echo "starting in $MODE mode"
+    openssl req -x509 -newkey rsa:2048 -nodes -sha256 -subj '/CN=localhost' \
+        -keyout keys/private-key.pem -out keys/certificate.pem
     set -a && source $ENV && set +a
     exec node -r dotenv/config server.js dotenv_config_path=$ENV
 fi

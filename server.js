@@ -9,12 +9,15 @@ import { v4 as uuidv4 } from "uuid";
 import "dotenv/config";
 import sharp from "sharp";
 import multer from "multer";
-import { unlink } from "node:fs";
+import { unlink, readFileSync } from "node:fs";
 import { createRequire } from "module";
+import http from "node:http";
+import https from "node:https";
 
 const require = createRequire(import.meta.url); // for loading i18n json
 
-const port = process.env.HTTP_PORT;
+const http_port = process.env.HTTP_PORT;
+const https_port = process.env.HTTPS_PORT;
 const hostname = process.env.HTTP_HOSTNAME;
 
 const app = express();
@@ -48,6 +51,15 @@ app.use(session({
         return uuidv4();
     },
 }));
+
+// redirect http to https
+app.use((req, res, next) => {
+    if (process.env.ENVIRONMENT === "prod" && !req.secure) {
+        return res.redirect("https://" + req.headers.host + req.url);
+    }
+
+    next();
+})
 
 const locales = {
     "en"      : true,
@@ -511,6 +523,31 @@ app.get(/^\/([^\.]+)(\..+)?/, (req, res) => {
     });
 });
 
-app.listen(port, hostname, () => {
-    console.log(`server running at http://${hostname}:${port}`);
+const options = {
+  key  : readFileSync('./keys/private-key.pem'),
+  cert : readFileSync('./keys/certificate.pem'),
+};
+
+https.createServer(options, app).listen(https_port, hostname, () => {
+    console.log(`HTTPS server running at https://${hostname}:${https_port}`);
 });
+
+// redirect HTTP to HTTPS in production
+if (process.env.ENVIRONMENT === "prod") {
+    const httpApp = express();
+
+    httpApp.use((req, res, next) => {
+        if (!req.secure) {
+            return res.redirect(301, `https://${req.headers.host.replace(http_port, https_port)}${req.url}`);
+        }
+        next();
+    });
+
+    http.createServer(httpApp).listen(http_port, hostname, () => {
+        console.log(`HTTP redirect server running at http://${hostname}:${http_port}`);
+    });
+} else {
+    http.createServer(app).listen(http_port, hostname, () => {
+        console.log(`HTTP server running at http://${hostname}:${http_port}`);
+    });
+}
