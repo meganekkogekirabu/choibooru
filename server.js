@@ -9,12 +9,15 @@ import { v4 as uuidv4 } from "uuid";
 import "dotenv/config";
 import sharp from "sharp";
 import multer from "multer";
-import { unlink } from "node:fs";
+import { unlink, readFileSync } from "node:fs";
 import { createRequire } from "module";
+import http from "node:http";
+import https from "node:https";
 
 const require = createRequire(import.meta.url); // for loading i18n json
 
-const port = process.env.HTTP_PORT;
+const http_port = process.env.HTTP_PORT;
+const https_port = process.env.HTTPS_PORT;
 const hostname = process.env.HTTP_HOSTNAME;
 
 const app = express();
@@ -511,6 +514,15 @@ app.get(/^\/([^\.]+)(\..+)?/, (req, res) => {
     });
 });
 
-app.listen(port, hostname, () => {
-    console.log(`server running at http://${hostname}:${port}`);
+const options = {
+  key  : readFileSync('private-key.pem'),
+  cert : readFileSync('certificate.pem'),
+};
+
+http.createServer(app).listen(http_port, hostname, () => {
+    console.log(`server running at http://${hostname}:${http_port}`);
+});
+
+https.createServer(options, app).listen(https_port, hostname, () => {
+    console.log(`server running at https://${hostname}:${https_port}`);
 });
