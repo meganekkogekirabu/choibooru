@@ -294,7 +294,7 @@ fetch(`/api/src${window.location.search}`, {
             }
         } else {
             const rating = document.createElement("p");
-            rating.innerHTML = `<br>${t["post-rating"]} ${data.rating}`;
+            rating.innerHTML = `<br>${t["post-rating"]} ${data.rating ?? "general"}`;
             rating.lang = i18n.current_lang;
             score.after(rating);
         }
