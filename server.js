@@ -59,17 +59,17 @@ const locales = {
 }
 
 // middleware for setting locale
-app.use((req, _, next) => {
+const locale = (req, _, next) => {
     const lang =
     req.host.split(".")[0] ??
     req.headers["accept-language"];
 
-    req.session.lang = locales[lang] ? lang : "en";
+    req.session.lang = locales[lang] ? lang : req.query.lang ?? "en";
 
     next();
-});
+};
 
-app.get("/", (_, res) => {
+app.get("/", locale, (_, res) => {
     res.sendFile(join(__dirname, "public", "index.html"));
 });
 
@@ -114,8 +114,7 @@ app.post("/api/signup", async (req, res) => {
         });
     } catch(e) {
         console.error("Failed to create user:", e);
-        res.json({
-            status : 500,
+        res.status(500).json({
             error  : "Failed to create user.",
         });
     }
@@ -138,8 +137,7 @@ app.post("/api/signin", async (req, res) => {
         });
     } catch (e) {
         console.error("Failed to authenticate user:", e);
-        res.json({
-            status : 500,
+        res.status(500).json({
             error  : "Failed to authenticate user.",
         });
     }
@@ -184,13 +182,11 @@ app.get("/api/posts", async (req, res) => {
 
 app.post("/api/upload", upload.single("post"), async (req, res) => {
     if (!req.session.username) {
-        return res.json({
-            status : 403,
+        return res.status(403).json({
             error  : "Not authorised.",
         });
     } else if (!req.file) {
-        return res.json({
-            status : 400,
+        return res.status(400).json({
             error  : "Bad request.",
         });
     }
@@ -209,8 +205,7 @@ app.post("/api/upload", upload.single("post"), async (req, res) => {
 
         res.sendStatus(200);
     } catch(err) {
-        res.json({
-            status : 500,
+        res.status(500).json({
             error  : "An internal server error occurred.",
         });
     }
@@ -220,8 +215,7 @@ app.get("/api/src", async (req, res) => {
     const { id } = req.query;
 
     if (!id) {
-        res.json({
-            status : 400,
+        res.status(400).json({
             error  : "Bad request.",
         });
     }
@@ -232,8 +226,7 @@ app.get("/api/src", async (req, res) => {
         `, [id]));
     } catch(err) {
         console.error(err);
-        res.json({
-            status : 500,
+        res.status(500).json({
             error  : "An internal server error occurred.",
         });
     }
@@ -244,13 +237,11 @@ app.post("/api/vote", async (req, res) => {
     const voters = _row.voters;
 
     if (!req.session.username || (voters?.includes("," + req.session.username + ",") ?? false)) {
-        return res.json({
-            status : 403,
+        return res.status(403).json({
             error  : "Not authorised.",
         });
     } else if (Math.abs(req.body.dir) !== 1) {
-        return res.json({
-            status : 400,
+        return res.status(400).json({
             error  : "Bad request.",
         });
     }
@@ -267,8 +258,7 @@ app.post("/api/vote", async (req, res) => {
         res.sendStatus(200);
     } catch(err) {
         console.error(err);
-        res.json({
-            status : 500,
+        res.status(500).json({
             error  : "An internal server error occurred.",
         });
     }
@@ -278,13 +268,11 @@ app.post("/api/tag/add", async (req, res) => {
     const { tag, id } = req.body;
 
     if (!req.session.username) {
-        res.json({
-            status : 403,
+        res.status(403).json({
             error  : "Not authorised.",
         });
     } else if (!tag || !id) {
-        res.json({
-            status : 400,
+        res.status(400).json({
             error  : "Bad request.",
         });
     }
@@ -299,15 +287,13 @@ app.post("/api/tag/add", async (req, res) => {
 
             res.sendStatus(200);
         } else {
-            res.json({
-                status : 400,
+            res.status(400).json({
                 error  : "The specified tag is already applied to this post.",
             });
         }
     } catch(err) {
         console.error(err);
-        res.json({
-            status : 500,
+        res.status(500).json({
             error  : "An internal server error occurred.",
         });
     }
@@ -317,13 +303,11 @@ app.post("/api/tag/remove", async (req, res) => {
     const { tag, id } = req.body;
 
     if (!req.session.username) {
-        res.json({
-            status : 403,
+        res.status(403).json({
             error  : "Not authorised.",
         });
     } else if (!tag || !id) {
-        res.json({
-            status : 400,
+        res.status(400).json({
             error  : "Bad request.",
         });
     }
@@ -336,8 +320,7 @@ app.post("/api/tag/remove", async (req, res) => {
         res.sendStatus(200);
     } catch(err) {
         console.error(err);
-        res.json({
-            status : 500,
+        res.status(500).json({
             error  : "An internal server error occurred.",
         });
     }
@@ -345,13 +328,11 @@ app.post("/api/tag/remove", async (req, res) => {
 
 app.post("/api/rate", async (req, res) => {
     if (!req.session.username) {
-        return res.json({
-            status : 403,
+        return res.status(403).json({
             error  : "Not authorised.",
         });
     } else if (!req.body.rating || !req.body.id) {
-        return res.json({
-            status : 400,
+        return res.status(400).json({
             error  : "Bad request.",
         });
     }
@@ -364,8 +345,7 @@ app.post("/api/rate", async (req, res) => {
         res.status(200).send("Tagging successful.");
     } catch(err) {
         console.error(err);
-        res.json({
-            status : 500,
+        res.status(500).json({
             error  : "An internal server error occurred.",
         });
     }
@@ -376,8 +356,7 @@ app.post("/api/search", async (req, res) => {
         const { tag, offset, limit, total } = req.body;
 
         if (!tag || typeof tag !== "string") {
-            return res.json({
-                status : 400,
+            return res.status(400).json({
                 error  : "Bad request.",
             });
         }
@@ -425,8 +404,7 @@ app.post("/api/search", async (req, res) => {
 
     } catch(err) {
         console.error(err);
-        res.json({
-            status : 500,
+        res.status(500).json({
             error  : "An internal server error occurred.",
         });
     }
@@ -435,13 +413,11 @@ app.post("/api/search", async (req, res) => {
 app.post("/api/delete", async (req, res) => {
     try {
         if (!req.session.is_admin) {
-            return res.json({
-                status : 403,
+            return res.status(403).json({
                 error  : "Not authorised.",
             });
         } else if (!req.body.id) {
-            return res.json({
-                status : 400,
+            return res.status(400).json({
                 error  : "Bad request.",
             });
         }
@@ -459,8 +435,7 @@ app.post("/api/delete", async (req, res) => {
         unlink(join(__dirname, "public", src), (err) => {
             if (err) {
                 console.error(err);
-                return res.json({
-                    status : 500,
+                return res.status(500).json({
                     error  : "An internal server error occurred.",
                 });
             }
@@ -469,8 +444,7 @@ app.post("/api/delete", async (req, res) => {
         res.sendStatus(200);
     } catch(err) {
         console.error(err);
-        res.json({
-            status : 500,
+        res.status(500).json({
             error  : "An internal server error occurred.",
         });
     }
@@ -484,14 +458,12 @@ app.get("/api/translations", (req, res) => {
 
 app.get("/api/lang", (req, res) => {
     try {
-        res.json({
-            status : 200,
+        res.status(200).json({
             lang   : req.session.lang,
         });
     } catch(err) {
         console.error(err);
-        res.json({
-            status : 500,
+        res.status(500).json({
             error  : "An internal server error occurred.",
         });
     }
@@ -508,13 +480,11 @@ app.post("/api/source", async (req, res) => {
     const valid_url = source.match(/^[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)$/mi);
 
     if (!req.session.username) {
-        return res.json({
-            status : 403,
+        return res.status(403).json({
             error  : "Not authorised.",
         });
     } else if (!id || !source || !valid_url) {
-        return res.json({
-            status : 400,
+        return res.status(400).json({
             error  : "Bad request.",
         });
     }
@@ -522,13 +492,12 @@ app.post("/api/source", async (req, res) => {
     try {
         await database.run(`
             UPDATE posts SET source = ? WHERE id = ?;
-        `, [id, source]);
+        `, [source, id]);
 
         res.sendStatus(200);
     } catch(err) {
         console.error(err);
-        res.json({
-            status : 500,
+        res.status(500).json({
             error  : "An internal server error occurred.",
         });
     }
