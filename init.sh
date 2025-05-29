@@ -34,7 +34,7 @@ sqlite3 booru.db <<EOF
         "date" TIMESTAMP,
         "score" INTEGER DEFAULT 0,
         "voters" TEXT,
-        "rating" VARCHAR(20) CHECK("rating" IN ('general', 'sensitive', 'questionable', 'explicit')),
+        "rating" VARCHAR(20) DEFAULT 'general' CHECK("rating" IN ('general', 'sensitive', 'questionable', 'explicit')),
         "tags" TEXT,
         "deleted" BOOL DEFAULT 0 CHECK("deleted" IN (0, 1)),
         "source" TEXT,
