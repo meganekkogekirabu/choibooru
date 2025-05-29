@@ -25,7 +25,7 @@ const app = express();
 const upload = multer({
     storage : multer.memoryStorage(),
     limits  : {
-      fileSize : 5 * 1024 * 1024, // 5MB
+      fileSize : 10 * 1024 * 1024, // 10MB
       files    : 1
     },
     fileFilter : (_, file, cb) => {
@@ -71,17 +71,17 @@ const locales = {
 }
 
 // middleware for setting locale
-const locale = (req, _, next) => {
+app.use((req, _, next) => {
     const lang =
     req.host.split(".")[0] ??
     req.headers["accept-language"];
 
-    req.session.lang = locales[lang] ? lang : req.query.lang ?? "en";
+    req.session.lang = locales[lang] ? lang : "en";
 
     next();
-};
+});
 
-app.get("/", locale, (_, res) => {
+app.get("/", (_, res) => {
     res.sendFile(join(__dirname, "public", "index.html"));
 });
 
@@ -208,7 +208,11 @@ app.post("/api/upload", upload.single("post"), async (req, res) => {
         const src = join("assets", "posts", date + ".webp");
 
         await sharp(req.file.buffer)
-            .webp({ quality: 100 })
+            .webp({
+                quality      : 70,
+                nearLossless : true,
+                effort       : 5,
+            })
             .toFile(join(__dirname, "public", src));
         
         await database.run(`
