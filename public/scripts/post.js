@@ -1,7 +1,3 @@
-const tr = i18n.load_translations().then(async () => {
-    return await i18n.translations;
-});
-
 let post_ready = new Promise((res) => {
 
 fetch(`/api/src${window.location.search}`, {
@@ -318,12 +314,7 @@ document.getElementById("logo").addEventListener("click", () => {
     window.location.href = "/";
 });
 
-i18n.load_translations().then(() => {
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        el.innerHTML = i18n.t(el.dataset.i18n, el.dataset.i18nParams);
-        el.lang = i18n.current_lang;
-    });
-});
+load_translations();
 
 res();
 
