@@ -8,15 +8,14 @@ const search_input = document.querySelector("[name=query]");
 })();
 
 const search_button = document.getElementById("search-button");
-let current_search_tag;
 
-function search() {
-    if (!search_input.value) {
+function search(current_search_tag) {
+    if (!search_input.value && !current_search_tag) {
         window.location.reload();
         return;
     }
 
-    current_search_tag = search_input.value;
+    current_search_tag = current_search_tag ?? search_input.value;
 
     fetch("/api/search", {
         method: "POST",
@@ -25,7 +24,7 @@ function search() {
         },
         body: JSON.stringify({
             tag: current_search_tag,
-            total: true
+            total: true,
         }),
     })
 

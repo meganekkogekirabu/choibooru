@@ -133,11 +133,16 @@ fetch(`/api/src${window.location.search}`, {
         _tags.forEach((tag) => {
             const li = document.createElement("li");
             const a = document.createElement("a");
-            a.className = "tag";
+            a.className = "tag-remove";
             a.dataset.target = tag;
             tag_removes.push(a);
 
             li.textContent = tag;
+            li.className = "tag-name";
+            li.addEventListener("click", () => {
+                search(tag);
+            });
+
             li.appendChild(a);
             tags.appendChild(li);
         });
@@ -188,7 +193,6 @@ fetch(`/api/src${window.location.search}`, {
 
                 tag_removes.forEach(tag => {
                     tag.innerHTML = "&nbsp;-";
-                    tag.style.cursor = "pointer";
                     
                     tag.addEventListener("click", async () => {
                     await fetch("/api/tag/remove", {

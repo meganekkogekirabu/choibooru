@@ -150,7 +150,9 @@ input:not([type=submit]) {
 }
 
 #logo:hover,
-.post>img:hover {
+.post>img:hover,
+.tag-remove,
+.tag-name {
     cursor: pointer;
 }
 
