@@ -216,9 +216,7 @@ label {
     cursor: default;
 }
 
-[lang=zh],
-[lang=zh-hant],
-[lang=zh-hans] {
+[lang]:not([lang=en]) {
     font-family: sans-serif;
 }
 
