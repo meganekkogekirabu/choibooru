@@ -60,6 +60,7 @@ HTTP_HOSTNAME=""
 HTTP_PORT=0
 HTTPS_PORT=0
 ENVIRONMENT="$MODE"
+CN=""
 EOF
     echo
     cat <<EOF
@@ -69,13 +70,14 @@ set values for:
     HTTP_HOSTNAME
     HTTP_PORT
     HTTPS_PORT
+    CN
 EOF
     sleep 5
     exit 1
 else
     echo
     echo "starting in $MODE mode"
-    openssl req -x509 -newkey rsa:2048 -nodes -sha256 -subj '/CN=localhost' \
+    openssl req -x509 -newkey rsa:2048 -nodes -sha256 -subj '/CN=$CN' \
         -keyout keys/private-key.pem -out keys/certificate.pem
     set -a && source $ENV && set +a
     exec node -r dotenv/config server.js dotenv_config_path=$ENV
