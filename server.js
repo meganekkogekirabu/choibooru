@@ -137,10 +137,10 @@ app.post("/api/signin", async (req, res) => {
         const ret = await user.sign_in(req.body.username, req.body.password);
 
         Object.assign(req.session, {
-            username: ret.username,
-            is_admin: ret.is_admin,
-            user_id: ret.user_id,
-            is_full: ret.is_full,
+            username : ret.username,
+            is_admin : ret.is_admin,
+            user_id  : ret.user_id,
+            is_full  : ret.is_full,
         });
 
         res.json({
@@ -487,7 +487,7 @@ app.get("/api/lang", (req, res) => {
 
 app.get("/favicon.ico", (_, res) => {
     res.sendFile(join(__dirname, "public", "assets", "favicon.ico"))
-})
+});
 
 app.post("/api/source", async (req, res) => {
     const { id, source } = req.body;
@@ -515,6 +515,29 @@ app.post("/api/source", async (req, res) => {
         console.error(err);
         res.status(500).json({
             error  : "An internal server error occurred.",
+        });
+    }
+});
+
+app.post("/api/new-key", async (req, res) => {
+    const username = req.body.username ?? req.session.username;
+
+    if (!username) {
+        return res.status(400).json({
+            error : "Bad request.",
+        });
+    }
+
+    try {
+        const ret = await user.new_api_key(username);
+        res.json({
+            response : ret.response,
+            key      : ret.key,
+            status   : ret.status,
+        });
+    } catch(err) {
+        res.status(500).json({
+            error : "An internal server error occurred.",
         });
     }
 })

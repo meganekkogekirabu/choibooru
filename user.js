@@ -22,7 +22,7 @@ export async function create_user(username, password) {
         console.error(e);
         return {
             response : "Please pick a different username; the one you have chosen already exists.",
-            status   : 400,
+            status   : 409,
         }
     }
     
@@ -70,5 +70,33 @@ export async function sign_in(username, password) {
             response : "Incorrect username or password.",
             status   : 403,
         };
+    }
+}
+
+export async function new_api_key(user_id) {
+    if (!user_id) {
+        return {
+            response : "new_api_key did not receive user ID",
+            status   : 400,
+        }
+    }
+
+    const key = (Math.random() + 1).toString(36).substring(2);
+
+    try {
+        await database.run(`
+            UPDATE users SET key = ? WHERE id = ?;
+        `, [key, user_id]);
+
+        return {
+            response : "Successfully updated API key.",
+            key      : key,
+            status   : 200,
+        }
+    } catch(err) {
+        return {
+            response : "An internal server error occurred.",
+            status   : 500,
+        }
     }
 }
