@@ -27,6 +27,7 @@ The first time running the script will give a message like ".dev/prod.env create
 - `HTTP_HOSTNAME`: the hostname the server runs on
 - `HTTP_PORT`: the port the HTTP server runs on
 - `HTTPS_PORT`: the port the HTTPS server runs on
+- `CN`: the name used for the SSL certificate
 
 After adding values for these environment variables, the server can be run.
 
