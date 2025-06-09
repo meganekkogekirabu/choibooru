@@ -78,7 +78,8 @@ else
     echo
     echo "starting in $MODE mode"
     openssl req -x509 -newkey rsa:2048 -nodes -sha256 -subj '/CN=$CN' \
-        -keyout keys/private-key.pem -out keys/certificate.pem
+        -keyout keys/private-key.pem -out keys/certificate.pem \
+        -quiet
     set -a && source $ENV && set +a
     exec node -r dotenv/config server.js dotenv_config_path=$ENV
 fi
