@@ -26,7 +26,6 @@ const app = express();
 const upload = multer({
     storage : multer.memoryStorage(),
     limits  : {
-      fileSize : 10 * 1024 * 1024, // 10MB
       files    : 1
     },
     fileFilter : (_, file, cb) => {
@@ -40,7 +39,10 @@ const upload = multer({
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-app.use(morgan("combined"));
+if (process.argv.includes("--verbose")) {
+    app.use(morgan("combined"));
+}
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -374,54 +376,69 @@ app.post("/api/rate", (async (req, res) => {
 
 app.post("/api/search", (async (req, res) => {
     try {
-        const { tag, offset, limit, total } = req.body;
+        const { query, offset, limit, total } = req.body;
 
-        if (!tag || typeof tag !== "string") {
+        if (!query || typeof query !== "object") {
             return res.status(400).json({
                 error  : "Bad request.",
             });
         }
 
-        let query = `
-            SELECT * FROM posts WHERE tags LIKE ?
-        `;
-        const params = [`%,${tag},%`];
+        const all_posts = await posts.grab();
+        let filtered_posts = [];
 
-        if (total) {
-            const all_posts = await database.all(`
-                SELECT * FROM posts WHERE tags LIKE ?
-            `, params);
+        for (const post of all_posts) {
+            let matches = true;
 
-            let filtered_posts = [];
-
-            for (const post of all_posts) {
-                if ((post.rating === "explicit" || post.deleted === 1) && (!req.session.is_full || !req.session.username)) {
-                    continue;
-                } else {
-                    filtered_posts.push(post);
+            // AND (&)
+            if (query.and && query.and.length > 0) {
+                for (const tag of query.and) {
+                    if (!post.tags?.includes(`,${tag},`)) {
+                        matches = false;
+                        break;
+                    }
                 }
             }
 
-            return res.json({ total: filtered_posts.length, tag: tag });
+            // OR (|)
+            if (matches && query.or && query.or.length > 0) {
+                matches = false;
+                for (const tag of query.or) {
+                    if (post.tags?.includes(`,${tag},`)) {
+                        matches = true;
+                        break;
+                    }
+                }
+            }
+
+            // NOT (!)
+            if (matches && query.not && query.not.length > 0) {
+                for (const tag of query.not) {
+                    if (post.tags?.includes(`,${tag},`)) {
+                        matches = false;
+                        break;
+                    }
+                }
+            }
+            
+            if (matches && (post.rating === "explicit" || post.deleted === 1) && (!req.session.is_full || !req.session.username)) {
+                matches = false;
+            }
+
+            if (matches) {
+                filtered_posts.push(post);
+            }
+        }
+
+        if (total) {
+            return res.json({ total: filtered_posts.length, tag: query });
         }
 
         const page_offset = parseInt(offset) || 0;
         const page_limit = parseInt(limit) || 10;
-        query += ` LIMIT ? OFFSET ?`;
-        params.push(`${page_limit}`, `${page_offset}`);
-
-        const posts = await database.all(query, params);
-        const ret = [];
-
-        for (const post of posts) {
-            if (post.rating === "explicit" && (!req.session.is_full || !req.session.username)) {
-                continue;
-            } else {
-                ret.push(post);
-            }
-        }
+        const paginated_posts = filtered_posts.reverse().slice(page_offset, page_offset + page_limit);
         
-        res.json(ret.reverse());
+        res.json(paginated_posts);
 
     } catch(err) {
         console.error(err);

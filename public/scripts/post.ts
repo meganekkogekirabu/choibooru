@@ -1,294 +1,336 @@
-import { i18n } from './common.js';
-import { auth_ready } from './auth.js';
+import { i18n, load_translations, tr } from "./common.js";
+import { search } from "./search.js";
 
-interface Post {
-    id       : number;
-    src      : string;
-    uploader : string;
-    date     : number;
-    score    : number;
-    voters   : string;
-    tags     : string;
-    rating   : string;
-    deleted  : number;
-    source?  : string;
-}
+let post_ready = new Promise<void>((res) => {
 
-interface ApiResponse {
-    status   : number;
-    response?: string;
-    error?   : string;
-}
+fetch(`/api/src${window.location.search}`, {
+    method : "GET",
+})
 
-interface VoteResponse extends ApiResponse {
-    dir?     : number;
-}
+.then(response => response.json())
 
-interface TagResponse extends ApiResponse {
-    tag?     : string;
-}
+.then(async (data) => {
+    const t = await tr;
+    const posts = document.getElementById("posts") as HTMLElement;
+    posts.innerHTML = "";
 
-interface RateResponse extends ApiResponse {
-    rating?  : string;
-}
+    if (data.deleted === 1) {
+        const p = document.createElement("p");
+        p.innerHTML = `${t["post-deleted"]}<br><br>${t["post-original-filename"]} ${data.src}`;
+        p.lang = i18n.current_lang;
+        posts.appendChild(p);
+    } else {
+        const figure = document.createElement("figure");
+        const img = document.createElement("img");
+        img.src = data.src;
+        img.style.maxHeight = "400px";
 
-interface SourceResponse extends ApiResponse {
-    source?  : string;
-}
+        const caption = document.createElement("figcaption");
+        caption.style.display = "flex";
+        caption.style.justifyContent = "space-between";
+        caption.style.marginTop = "15px";
 
-declare global {
-    interface Window {
-        post_ready? : Promise<void>;
+        const status = document.createElement("div");
+        status.style.fontSize = "13px";
+
+        const vote = document.createElement("div");
+
+        const upvote = document.createElement("a");
+        upvote.textContent = "▲";
+        upvote.style.color = "#5963A6";
+        upvote.style.border = "solid 1px";
+        upvote.style.cursor = "pointer";
+        upvote.addEventListener("click", () => {
+            fetch("/api/auth", {method: "POST"})
+            .then(response => response.json())
+            .then(async authdata => {
+                if (!authdata.username) {
+                    status.textContent = t["post-vote-warning"];
+                    status.lang = i18n.current_lang;
+                } else {
+                    await fetch("/api/vote", {
+                        method  : "POST",
+                        headers : {
+                            "Content-Type": "application/json",
+                        },
+                        body    : JSON.stringify({
+                            dir : 1,
+                            id  : data.id,
+                        }),
+                    });
+                    window.location.reload();
+                }
+            });
+        });
+
+        const downvote = document.createElement("a");
+        downvote.textContent = "▼";
+        downvote.style.color = "#A659A3";
+        downvote.style.border = "solid 1px";
+        downvote.style.cursor = "pointer";
+        downvote.addEventListener("click", () => {
+            fetch("/api/auth", {method: "POST"})
+            .then(response => response.json())
+            .then(async data => {
+                if (!data.username) {
+                    status.textContent = t["post-vote-warning"];
+                    status.lang = i18n.current_lang;
+                } else {
+                    await fetch("/api/vote", {
+                        method  : "POST",
+                        headers : {
+                            "Content-Type": "application/json",
+                        },
+                        body    : JSON.stringify({
+                            dir : -1,
+                            id  : data.id,
+                        }),
+                    });
+                    window.location.reload();
+                }
+            });
+        });
+
+        vote.appendChild(upvote);
+        vote.appendChild(downvote);
+        caption.appendChild(vote);
+        caption.appendChild(status);
+
+        figure.appendChild(img);
+        figure.appendChild(caption);
+        posts.appendChild(figure);
     }
-}
 
-let post: Post;
-let post_ready: Promise<void>;
+    const sidebar = document.getElementById("sidebar");
 
-window.post_ready = post_ready = new Promise<void>((res) => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const id = urlParams.get('id');
+    if (!sidebar) throw new Error("sidebar does not exist");
 
-    if (!id) {
-        window.location.href = "/";
-        return;
+    if (data.deleted !== 1) {
+        const a = document.createElement("a");
+        a.href = data.src;
+        a.innerHTML = `${t["post-original-image"]} &raquo;<br><br>`;
+        a.lang = i18n.current_lang;
+        a.target = "_blank";
+        if (sidebar) sidebar.appendChild(a);
     }
 
-    fetch("/api/src?id=" + id)
-        .then(res => res.json())
-        .then((data: Post) => {
-            post = data;
-            const post_img = document.getElementById("post-img") as HTMLImageElement;
-            if (post_img) {
-                post_img.src = "/" + post.src;
+    const score = document.createElement("p");
+    score.innerHTML = `${t["post-score"]} ${data.score}`;
+    score.lang = i18n.current_lang;
+    if (sidebar) sidebar.appendChild(score);
+
+    const tag_head = document.createElement("p")
+    tag_head.innerHTML = `<br>${t["post-tags"]}`;
+    tag_head.lang = i18n.current_lang;
+
+    const tags = document.createElement("ul");
+    tags.style.padding = "10px";
+
+    const tag_removes: any[] = [] // since querySelector for .tag later doesn't work on mobile, store a.tag[data-target=...] here
+
+    if (!data.tags) {
+        const li = document.createElement("li");
+        li.textContent = t["post-tagme"];
+        li.lang = i18n.current_lang;
+        tags.appendChild(li);
+    } else {
+        const _tags = data.tags.match(/[^,]+/g)?.filter(Boolean) || [];
+        _tags.forEach((tag: string) => {
+            const li = document.createElement("li");
+            const a = document.createElement("a");
+            a.className = "tag-remove";
+            a.dataset.target = tag;
+            tag_removes.push(a);
+
+            li.textContent = tag;
+            li.className = "tag-name";
+            li.addEventListener("click", () => {
+                search(tag);
+            });
+
+            li.appendChild(a);
+            tags.appendChild(li);
+        });
+    }
+
+    fetch("/api/auth", {method: "POST"})
+    .then(response => response.json())
+    .then(async (authdata) => {
+        if (authdata.username) {
+            if (data.deleted !== 1)  {
+                const form = document.createElement("form");
+                form.style.marginTop = "15px";
+                form.style.display = "inline-block";
+
+                const input = document.createElement("input");
+                input.name = "tag";
+                input.style.height = "10px";
+                input.style.width = "80px";
+
+                const submit = document.createElement("input");
+                submit.type = "submit";
+                submit.value = "+";
+                submit.id = "submit";
+
+                form.appendChild(input);
+                form.appendChild(submit);
+
+                form.addEventListener("submit", async (event) => {
+                    event.preventDefault();
+
+                    const formData = new FormData(form);
+                    
+                    await fetch("/api/tag/add", {
+                        method  : "POST",
+                        headers : {
+                            "Content-Type": "application/json",
+                        },
+                        body    : JSON.stringify({
+                            tag : formData.get("tag"),
+                            id  : data.id,
+                        }),
+                    });
+
+                    window.location.reload();
+                })
+
+                if (sidebar) sidebar.appendChild(form);
+
+                tag_removes.forEach(tag => {
+                    tag.innerHTML = "&nbsp;-";
+                    
+                    tag.addEventListener("click", async () => {
+                    await fetch("/api/tag/remove", {
+                        method  : "POST",
+                        headers : {
+                            "Content-Type": "application/json",
+                        },
+                        body    : JSON.stringify({
+                            tag : tag.dataset.target,
+                            id  : data.id,
+                        }),
+                    });
+
+                    window.location.reload();
+                })});
             }
 
-            const post_score = document.getElementById("post-score");
-            if (post_score) {
-                post_score.textContent = post.score.toString();
+            let dropdown: HTMLElement;
+            if (data.deleted === 1) {
+                const rating = document.createElement("p");
+                rating.innerHTML = `<br>${t["post-rating"]} ${data.rating ?? "general"}`;
+                rating.lang = i18n.current_lang;
+                score.after(rating);
+            } else {
+                const label = document.createElement("label");
+                label.textContent = t["post-rating"];
+                label.lang = i18n.current_lang;
+                label.for = "rating";
+
+                score.after(label);
+                score.after(document.createElement("br"));
+
+                dropdown = document.createElement("select");
+                dropdown.id = "rating";
+
+                const ratings = ["general", "sensitive", "questionable", "explicit"];
+                // FIXME: these aren't integrated with i18n
+
+                ratings.forEach(option => {
+                    const element = document.createElement("option");
+                    element.value = option;
+                    element.textContent = option;
+
+                    if (data.rating === option) element.selected = true;
+
+                    dropdown.appendChild(element);
+                });
+
+                dropdown.addEventListener("change", async (event) => {
+                    let selected;
+                    const target = event.target as HTMLInputElement;
+                    if (target) selected = target.value;
+
+                    try {
+                        await fetch("/api/rate", {
+                            method  : "POST",
+                            headers : {
+                                "Content-Type": "application/json",
+                            },
+                            body    : JSON.stringify({
+                                id     : data.id,
+                                rating : selected,
+                            }),
+                        });
+                        window.location.reload();
+                    } catch(err) {
+                        console.error(err);
+                    }
+                });
+
+                label.after(dropdown);
             }
 
-            const post_uploader = document.getElementById("post-uploader");
-            if (post_uploader) {
-                post_uploader.textContent = post.uploader;
-            }
+            if (data.deleted !== 1) {
+                fetch("/api/auth", {method: "POST"})
+                .then(response => response.json())
+                .then(async authdata => {
+                    if (authdata.is_admin) {
+                        const button = document.createElement("button")
+                        button.textContent = t["post-delete"];
+                        button.lang = i18n.current_lang;
+                        button.style.marginTop = "15px";
+                        button.addEventListener("click", async () => {
+                            if (confirm(t["post-delete-confirm"])) {
+                                await fetch("/api/delete", {
+                                    method  : "POST",
+                                    headers : {
+                                        "Content-Type": "application/json",
+                                    },
+                                    body    : JSON.stringify({
+                                        id : data.id,
+                                    }),
+                                });
 
-            const post_date = document.getElementById("post-date");
-            if (post_date) {
-                post_date.textContent = new Date(post.date).toLocaleString();
-            }
-
-            const post_tags = document.getElementById("post-tags");
-            if (post_tags && post.tags) {
-                post.tags.split(",").forEach(tag => {
-                    if (tag) {
-                        const tag_el = document.createElement("a");
-                        tag_el.href = "/?tag=" + tag;
-                        tag_el.textContent = tag;
-                        post_tags.appendChild(tag_el);
+                                window.location.reload();
+                            }
+                        });
+                        sidebar.appendChild(button);
                     }
                 });
             }
-
-            const post_source = document.getElementById("post-source") as HTMLAnchorElement;
-            if (post_source && post.source) {
-                post_source.href = post.source;
-                post_source.textContent = post.source;
-            }
-
-            const post_rating = document.getElementById("post-rating");
-            if (post_rating) {
-                post_rating.textContent = post.rating;
-            }
-
-            res();
-        });
-});
-
-const vote = async (dir: number) => {
-    const post_score = document.getElementById("post-score");
-    const post_voters = document.getElementById("post-voters");
-
-    if (!post_score || !post_voters) return;
-
-    try {
-        const response = await fetch("/api/vote", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                id: post.id,
-                dir: dir,
-            }),
-        });
-
-        const data: VoteResponse = await response.json();
-
-        if (data.status === 200) {
-            post.score += dir;
-            post_score.textContent = post.score.toString();
-            post_voters.textContent = (parseInt(post_voters.textContent || "0") + 1).toString();
         } else {
-            alert(data.response);
-        }
-    } catch (error) {
-        console.error("Error:", error);
-    }
-};
-
-const add_tag = async () => {
-    const tag_input = document.getElementById("tag-input") as HTMLInputElement;
-    if (!tag_input) return;
-
-    const tag = tag_input.value;
-    if (!tag) return;
-
-    try {
-        const response = await fetch("/api/tag/add", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                id: post.id,
-                tag: tag,
-            }),
-        });
-
-        const data: TagResponse = await response.json();
-
-        if (data.status === 200) {
-            const post_tags = document.getElementById("post-tags");
-            if (post_tags) {
-                const tag_el = document.createElement("a");
-                tag_el.href = "/?tag=" + tag;
-                tag_el.textContent = tag;
-                post_tags.appendChild(tag_el);
-            }
-            tag_input.value = "";
-        } else {
-            alert(data.response);
-        }
-    } catch (error) {
-        console.error("Error:", error);
-    }
-};
-
-const remove_tag = async (tag: string) => {
-    try {
-        const response = await fetch("/api/tag/remove", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                id: post.id,
-                tag: tag,
-            }),
-        });
-
-        const data: TagResponse = await response.json();
-
-        if (data.status === 200) {
-            const post_tags = document.getElementById("post-tags");
-            if (post_tags) {
-                const tag_el = post_tags.querySelector(`a[href="/?tag=${tag}"]`);
-                if (tag_el) tag_el.remove();
-            }
-        } else {
-            alert(data.response);
-        }
-    } catch (error) {
-        console.error("Error:", error);
-    }
-};
-
-const rate = async (rating: string) => {
-    try {
-        const response = await fetch("/api/rate", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                id: post.id,
-                rating: rating,
-            }),
-        });
-
-        const data: RateResponse = await response.json();
-
-        if (data.status === 200) {
-            const post_rating = document.getElementById("post-rating");
-            if (post_rating) {
-                post_rating.textContent = rating;
-            }
-        } else {
-            alert(data.response);
-        }
-    } catch (error) {
-        console.error("Error:", error);
-    }
-};
-
-const set_source = async () => {
-    const source_input = document.getElementById("source-input") as HTMLInputElement;
-    if (!source_input) return;
-
-    const source = source_input.value;
-    if (!source) return;
-
-    try {
-        const response = await fetch("/api/source", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                id: post.id,
-                source: source,
-            }),
-        });
-
-        const data: SourceResponse = await response.json();
-
-        if (data.status === 200) {
-            const post_source = document.getElementById("post-source") as HTMLAnchorElement;
-            if (post_source) {
-                post_source.href = source;
-                post_source.textContent = source;
-            }
-            source_input.value = "";
-        } else {
-            alert(data.response);
-        }
-    } catch (error) {
-        console.error("Error:", error);
-    }
-};
-
-i18n.load_translations().then(async () => {
-    await auth_ready;
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        if (el instanceof HTMLElement) {
-            el.innerHTML = i18n.t(el.dataset.i18n || "", el.dataset.i18nParams);
-            el.lang = i18n.current_lang;
+            const rating = document.createElement("p");
+            rating.innerHTML = `<br>${t["post-rating"]} ${data.rating ?? "general"}`;
+            rating.lang = i18n.current_lang;
+            score.after(rating);
         }
     });
 
-    if (i18n.current_lang !== "en") {
-        const footer_right = document.getElementById("footer-right");
-        if (footer_right) {
-            const move_en = document.createElement("p");
-            move_en.innerHTML = "English";
-            move_en.style.cursor = "pointer";
+    const uploader = document.createElement("p");
+    uploader.innerHTML = `<br>${t["post-uploader"]} ${data.uploader}`;
+    uploader.lang = i18n.current_lang;
+    sidebar.appendChild(uploader);
 
-            move_en.addEventListener("click", () => {
-                window.location.href = window.location.href.replace(/(?<=^http:\/\/)[^.]+\./, "");
-            });
+    const date = document.createElement("p");
+    date.innerHTML = `<br>${t["post-date"]} ${new Date(data.date).toLocaleDateString()}`;
+    date.lang = i18n.current_lang;
+    sidebar.appendChild(date);
 
-            footer_right.appendChild(move_en);
-        }
-    }
-}); 
+    sidebar.appendChild(tag_head);
+    sidebar.appendChild(tags);
+});
+
+const logo = document.getElementById("logo")
+
+if (logo) logo.addEventListener("click", () => {
+    window.location.href = "/";
+});
+
+load_translations();
+
+res();
+
+}); // promise
+
+export { post_ready };

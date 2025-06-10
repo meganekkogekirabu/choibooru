@@ -1,6 +1,22 @@
 #!/bin/bash
 
-MODE=${1:-dev}
+MODE="dev"
+VERBOSE=false
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --verbose)
+            VERBOSE=true
+            shift
+            ;;
+        *)
+            # assume any other argument is the mode
+            MODE="$1"
+            shift
+            ;;
+    esac
+done
+
 ENV=".$MODE.env"
 
 OK="\e[32mOK      =>\e[0m"
@@ -112,6 +128,19 @@ echo -e "$OK transpiling frontend scripts to JavaScript"
 cd public/scripts
 tsc
 cd ../..
+
+if [ "$VERBOSE" == true ]; then
+    echo "$NOTICE verbose mode enabled"
+fi
+
 echo -e "$OK starting in $MODE mode"
 set -a && source $ENV && set +a
-exec node -r dotenv/config server.ts dotenv_config_path=$ENV
+
+start=(node -r dotenv/config server.ts "dotenv_config_path=$ENV")
+
+if [ $VERBOSE == true ]; then
+    echo "$NOTICE verbose mode enabled"
+    start+=(--verbose)
+fi
+
+exec "${start[@]}"

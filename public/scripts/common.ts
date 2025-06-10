@@ -63,7 +63,7 @@ class I18nService {
 
 const i18n = new I18nService();
 
-export const tr = i18n.load_translations().then(async () => {
+const tr = i18n.load_translations().then(async () => {
     return i18n.translations;
 });
 
@@ -87,18 +87,31 @@ async function add_posts(data: PostData): Promise<void> {
         
         if (current_search_tag) {
             fetch("/api/search", {
-                method: "POST",
-                headers: {
+                method  : "POST",
+                headers : {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({
-                    tag    : current_search_tag,
+                body    : JSON.stringify({
+                    query  : current_search_tag,
                     offset : start,
                     limit  : chunk
                 }),
             })
             .then(response => response.json())
-            .then(page_data => render_posts(page_data));
+            .then(page_data => {
+                if (Array.isArray(page_data)) {
+                    render_posts(page_data);
+                } else {
+                    console.error("Invalid response format:", page_data);
+                    posts.textContent = t["index-none"];
+                    posts.lang = i18n.current_lang;
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching posts:", error);
+                posts.textContent = t["index-none"];
+                posts.lang = i18n.current_lang;
+            });
         } else {
             fetch(`/api/posts?offset=${start}&limit=${chunk}`)
                 .then(response => response.json())
@@ -235,4 +248,4 @@ function load_translations(): void {
     });
 }
 
-export { add_posts, load_translations, i18n }; 
+export { add_posts, load_translations, i18n, tr }; 
