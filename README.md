@@ -15,8 +15,8 @@ The following programs are prerequisites to running this:
 On Linux, the init.sh script can be used to initialise the installation with the following commands:
 
 ```sh
-chmod +x init.sh
-./init.sh
+chmod +x bin/init.sh
+bin/init.sh
 ```
 
 init.sh can be run either for development mode, creating .dev.env, with `./init.sh` or `./init.sh dev`, or in production mode, creatoing .prod.env, with `./init.sh prod`.
@@ -34,8 +34,8 @@ After adding values for these environment variables, run init.sh again to genera
 Once the installation has been initialised, run the following commands to start the server:
 
 ```sh
-chmod +x start.sh
-./start.sh
+chmod +x bin/start.sh
+bin/start.sh
 ```
 
 
