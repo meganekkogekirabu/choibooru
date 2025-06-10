@@ -1,31 +1,12 @@
 import { i18n } from './common.js';
 import { add_posts } from './common.js';
 
-interface Post {
-    id       : number;
-    src      : string;
-    uploader : string;
-    date     : number;
-    score    : number;
-    voters   : string;
-    tags     : string;
-    rating   : string;
-    deleted  : number;
-    source?  : string;
-}
-
-interface SearchResponse {
-    total? : number;
-    tag?   : string;
-    error? : string;
-}
-
 const search_input = document.querySelector("[name=query]") as HTMLInputElement;
 
 (async () => {
     search_input.lang = i18n.current_lang
     search_input.placeholder = await i18n.load_translations().then(async () => {
-        return await i18n.translations["index-search"]
+        return i18n.translations["index-search"]
     });
 })();
 
