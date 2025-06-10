@@ -13,7 +13,6 @@ import { unlink, readFileSync } from "node:fs";
 import { createRequire } from "module";
 import http from "node:http";
 import https from "node:https";
-import crypto from "node:crypto";
 
 const require = createRequire(import.meta.url); // for loading i18n json
 
