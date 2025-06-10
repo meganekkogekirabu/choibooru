@@ -7,6 +7,7 @@ OK="\e[32mOK      =>\e[0m"
 WARNING="\e[33mWARNING =>\e[0m"
 ERROR="\e[31mERROR   =>\e[0m"
 NOTICE="NOTICE  =>"
+INDENT="        =>"
 
 mkdir -p logs
 echo -e "$NOTICE logging to logs/init.sh.log"
@@ -41,7 +42,7 @@ done
 if [[ ${#missing[@]} -gt 0 ]]; then
     echo -e "$ERROR missing the following required dependencies, exiting:"
     for dep in "${missing[@]}"; do
-        echo -e "   $dep"
+        echo -e "$INDENT $dep"
     done
     bail 1
 fi
@@ -91,13 +92,13 @@ CN=""
 EOF
     printf "%b\n" "$(cat <<EOF
 $OK created $ENV with default configuration
-    set values for:
-        SESSION_KEY
-        HTTP_HOSTNAME
-        HTTP_PORT
-        HTTPS_PORT
-        CN
-    then run this script again
+$INDENT set values for:
+$INDENT    SESSION_KEY
+$INDENT    HTTP_HOSTNAME
+$INDENT    HTTP_PORT
+$INDENT    HTTPS_PORT
+$INDENT    CN
+$INDENT then run this script again
 $OK exiting...
 EOF
 )"

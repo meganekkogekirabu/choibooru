@@ -7,6 +7,7 @@ OK="\e[32mOK      =>\e[0m"
 WARNING="\e[33mWARNING =>\e[0m"
 ERROR="\e[31mERROR   =>\e[0m"
 NOTICE="NOTICE  =>"
+INDENT="        =>"
 
 mkdir -p logs
 echo -e "$NOTICE logging to logs/start.sh.log"
@@ -41,7 +42,7 @@ done
 if [[ ${#missing[@]} -gt 0 ]]; then
     echo -e "$ERROR missing the following required dependencies, exiting:"
     for dep in "${missing[@]}"; do
-        echo -e "   $dep"
+        echo -e "$INDENT $dep"
     done
     bail 1
 fi
