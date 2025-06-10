@@ -108,6 +108,10 @@ done
 
 echo -e "$OK checking dependencies"
 npm install --silent
+echo -e "$OK transpiling frontend scripts to JavaScript"
+cd public/scripts
+tsc
+cd ../..
 echo -e "$OK starting in $MODE mode"
 set -a && source $ENV && set +a
 exec node -r dotenv/config server.ts dotenv_config_path=$ENV
