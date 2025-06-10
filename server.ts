@@ -79,6 +79,8 @@ app.use((req, _, next) => {
     next();
 });
 
+app.use(express.static(join(__dirname, "public")));
+
 app.get("/", (_, res) => {
     res.sendFile(join(__dirname, "public", "index.html"));
 });
@@ -545,12 +547,8 @@ app.post("/api/new-key", (async (req, res) => {
     }
 }) as express.RequestHandler);
 
-app.get(/^\/([^\.]+)(\..+)?/, (req, res) => {
-    res.sendFile(join(__dirname, "public", req.params[0] + (req.params[1] || ".html")), (err) => {
-        if (err) {
-            res.status(404).sendFile(join(__dirname, "public", "not_found.html"));
-        }
-    });
+app.get("*", (req, res) => {
+    res.status(404).sendFile(join(__dirname, "public", "not_found.html"));
 });
 
 const options = {
