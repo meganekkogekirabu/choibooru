@@ -8,8 +8,9 @@ WARNING="\e[33mWARNING =>\e[0m"
 ERROR="\e[31mERROR   =>\e[0m"
 NOTICE="NOTICE  =>"
 
-echo -e "$NOTICE logging to start.sh.log"
-exec > >(tee start.sh.log) 2>&1
+mkdir -p logs
+echo -e "$NOTICE logging to logs/start.sh.log"
+exec > >(tee ./logs/start.sh.log) 2>&1
 
 bail() {
     local status_code=${1:-0}
