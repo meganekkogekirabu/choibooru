@@ -13,6 +13,7 @@ import { unlink, readFileSync } from "node:fs";
 import { createRequire } from "module";
 import http from "node:http";
 import https from "node:https";
+import morgan from "morgan";
 
 const require = createRequire(import.meta.url); // for loading i18n json
 
@@ -39,6 +40,7 @@ const upload = multer({
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+app.use(morgan("combined"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -545,12 +547,10 @@ app.post("/api/new-key", (async (req, res) => {
     }
 }) as express.RequestHandler);
 
-app.get(/^\/([^\.]+)(\..+)?/, (req, res) => {
-    res.sendFile(join(__dirname, "public", req.params[0] + (req.params[1] || ".html")), (err) => {
-        if (err) {
-            res.status(404).sendFile(join(__dirname, "public", "not_found.html"));
-        }
-    });
+app.use(express.static("public"));
+
+app.use((_, res) => {
+  res.status(404).sendFile(join(__dirname, 'public', 'not_found.html'));
 });
 
 const options = {

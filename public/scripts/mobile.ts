@@ -1,5 +1,5 @@
-import { i18n } from './common';
-import { auth_ready } from './auth';
+import { i18n } from './common.js';
+import { auth_ready } from './auth.js';
 
 declare global {
     interface Window {

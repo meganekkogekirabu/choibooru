@@ -1,4 +1,4 @@
-import { i18n, tr } from './common';
+import { i18n, tr } from './common.js';
 
 interface AuthResponse {
     status    : number;

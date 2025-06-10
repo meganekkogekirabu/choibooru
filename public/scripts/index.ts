@@ -1,4 +1,4 @@
-import { add_posts, load_translations } from './common';
+import { add_posts, load_translations } from './common.js';
 
 fetch("/api/posts?total=true")
     .then(response => response.json())

@@ -64,7 +64,7 @@ class I18nService {
 const i18n = new I18nService();
 
 export const tr = i18n.load_translations().then(async () => {
-    return await i18n.translations;
+    return i18n.translations;
 });
 
 async function add_posts(data: PostData): Promise<void> {
