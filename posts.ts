@@ -1,4 +1,4 @@
-import * as database from "./database.js";
+import * as database from "./database.ts";
 
 export async function grab() {
     try {
@@ -11,7 +11,7 @@ export async function grab() {
     }
 }
 
-export async function upload(src, uploader) {
+export async function upload(src: string, uploader: string) {
     try {
         await database.run(`
             INSERT INTO posts (src, uploader, date)

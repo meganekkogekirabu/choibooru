@@ -1,9 +1,9 @@
 import express from "express";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import * as user from "./user.js";
-import * as posts from "./posts.js";
-import * as database from "./database.js";
+import * as user from "./user.ts";
+import * as posts from "./posts.ts";
+import * as database from "./database.ts";
 import session from "express-session";
 import { v4 as uuidv4 } from "uuid";
 import "dotenv/config";
@@ -13,6 +13,7 @@ import { unlink, readFileSync } from "node:fs";
 import { createRequire } from "module";
 import http from "node:http";
 import https from "node:https";
+import crypto from "node:crypto";
 
 const require = createRequire(import.meta.url); // for loading i18n json
 
@@ -32,7 +33,7 @@ const upload = multer({
         if (file.mimetype.startsWith("image/")) {
             cb(null, true);
         } else {
-            cb(new Error("Invalid file type."), false);
+            cb(new Error("Invalid file type."));
         }
     }
 });
@@ -43,13 +44,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(session({
-    secret            : process.env.SESSION_KEY,
+    secret            : process.env.SESSION_KEY as string,
     resave            : false,
     saveUninitialized : false,
     cookie            : { secure: false },
-    genid             : () => {
-        return uuidv4();
-    },
+    genid             : () => uuidv4(),
 }));
 
 // redirect http to https
@@ -61,7 +60,7 @@ app.use((req, res, next) => {
     next();
 })
 
-const locales = {
+const locales: Record<string, boolean> = {
     "en"      : true,
     "en-US"   : true,
     "es"      : true,
@@ -136,12 +135,14 @@ app.post("/api/signin", async (req, res) => {
     try {
         const ret = await user.sign_in(req.body.username, req.body.password);
 
-        Object.assign(req.session, {
-            username : ret.username,
-            is_admin : ret.is_admin,
-            user_id  : ret.user_id,
-            is_full  : ret.is_full,
-        });
+        if (ret.status === 200) {
+            Object.assign(req.session, {
+                username : ret.username,
+                is_admin : ret.is_admin,
+                user_id  : ret.user_id,
+                is_full  : ret.is_full,
+            });
+        }
 
         res.json({
             status   : ret.status,
@@ -166,11 +167,13 @@ app.post("/api/auth", (req, res) => {
 });
 
 app.post("/api/logout", (req, res) => {
-    req.session.destroy();
+    req.session.destroy((err) => {
+        console.error(err);
+    });
     res.sendStatus(200);
 });
 
-app.get("/api/posts", async (req, res) => {
+app.get("/api/posts", (async (req, res) => {
     const all_posts = await posts.grab();
     const filtered_posts = [];
     
@@ -186,13 +189,14 @@ app.get("/api/posts", async (req, res) => {
         return res.json({total: filtered_posts.length});
     }
 
-    const offset = parseInt(req.query.offset) || 0;
-    const limit = parseInt(req.query.limit) || 10;
+    const offset = typeof req.query.offset === 'string' ? parseInt(req.query.offset, 10) : 0;
+    const limit = typeof req.query.limit === 'string' ? parseInt(req.query.limit, 10) : 10;
+
     const paginated_posts = filtered_posts.reverse().slice(offset, offset + limit);
     res.json(paginated_posts);
-});
+}) as express.RequestHandler);
 
-app.post("/api/upload", upload.single("post"), async (req, res) => {
+app.post("/api/upload", upload.single("post"), (async (req, res) => {
     if (!req.session.username) {
         return res.status(403).json({
             error  : "Not authorised.",
@@ -225,7 +229,7 @@ app.post("/api/upload", upload.single("post"), async (req, res) => {
             error  : "An internal server error occurred.",
         });
     }
-});
+}) as express.RequestHandler);
 
 app.get("/api/src", async (req, res) => {
     const { id } = req.query;
@@ -248,7 +252,7 @@ app.get("/api/src", async (req, res) => {
     }
 });
 
-app.post("/api/vote", async (req, res) => {
+app.post("/api/vote", (async (req, res) => {
     const _row = await database.get(`SELECT voters FROM posts WHERE id = ?;`, [req.body.id]);
     const voters = _row.voters;
 
@@ -278,7 +282,7 @@ app.post("/api/vote", async (req, res) => {
             error  : "An internal server error occurred.",
         });
     }
-});
+}) as express.RequestHandler);
 
 app.post("/api/tag/add", async (req, res) => {
     const { tag, id } = req.body;
@@ -342,7 +346,7 @@ app.post("/api/tag/remove", async (req, res) => {
     }
 });
 
-app.post("/api/rate", async (req, res) => {
+app.post("/api/rate", (async (req, res) => {
     if (!req.session.username) {
         return res.status(403).json({
             error  : "Not authorised.",
@@ -365,9 +369,9 @@ app.post("/api/rate", async (req, res) => {
             error  : "An internal server error occurred.",
         });
     }
-});
+}) as express.RequestHandler);
 
-app.post("/api/search", async (req, res) => {
+app.post("/api/search", (async (req, res) => {
     try {
         const { tag, offset, limit, total } = req.body;
 
@@ -403,7 +407,7 @@ app.post("/api/search", async (req, res) => {
         const page_offset = parseInt(offset) || 0;
         const page_limit = parseInt(limit) || 10;
         query += ` LIMIT ? OFFSET ?`;
-        params.push(page_limit, page_offset);
+        params.push(`${page_limit}`, `${page_offset}`);
 
         const posts = await database.all(query, params);
         const ret = [];
@@ -424,9 +428,9 @@ app.post("/api/search", async (req, res) => {
             error  : "An internal server error occurred.",
         });
     }
-});
+}) as express.RequestHandler);
 
-app.post("/api/delete", async (req, res) => {
+app.post("/api/delete", (async (req, res) => {
     try {
         if (!req.session.is_admin) {
             return res.status(403).json({
@@ -464,7 +468,7 @@ app.post("/api/delete", async (req, res) => {
             error  : "An internal server error occurred.",
         });
     }
-});
+}) as express.RequestHandler);
 
 app.get("/api/translations", (req, res) => {
     const { lang } = req.query;
@@ -489,7 +493,7 @@ app.get("/favicon.ico", (_, res) => {
     res.sendFile(join(__dirname, "public", "assets", "favicon.ico"))
 });
 
-app.post("/api/source", async (req, res) => {
+app.post("/api/source", (async (req, res) => {
     const { id, source } = req.body;
 
     // https://regexr.com/39nr7
@@ -517,9 +521,9 @@ app.post("/api/source", async (req, res) => {
             error  : "An internal server error occurred.",
         });
     }
-});
+}) as express.RequestHandler);
 
-app.post("/api/new-key", async (req, res) => {
+app.post("/api/new-key", (async (req, res) => {
     const username = req.body.username ?? req.session.username;
 
     if (!username) {
@@ -540,7 +544,7 @@ app.post("/api/new-key", async (req, res) => {
             error : "An internal server error occurred.",
         });
     }
-})
+}) as express.RequestHandler);
 
 app.get(/^\/([^\.]+)(\..+)?/, (req, res) => {
     res.sendFile(join(__dirname, "public", req.params[0] + (req.params[1] || ".html")), (err) => {
@@ -555,7 +559,10 @@ const options = {
   cert : readFileSync('./keys/certificate.pem'),
 };
 
-https.createServer(options, app).listen(https_port, hostname, () => {
+https.createServer(options, app).listen({
+    port     : https_port,
+    hostname : hostname,
+}, () => {
     console.log(`HTTPS server running at https://${hostname}:${https_port}`);
 });
 
@@ -563,18 +570,26 @@ https.createServer(options, app).listen(https_port, hostname, () => {
 if (process.env.ENVIRONMENT === "prod") {
     const httpApp = express();
 
-    httpApp.use((req, res, next) => {
-        if (!req.secure) {
-            return res.redirect(301, `https://${req.headers.host.replace(http_port, https_port)}${req.url}`);
+    httpApp.use(((req, res, next) => {
+        if (!req.secure && typeof http_port === "string" && typeof https_port === "string") {
+            const host = req.headers.host || `${hostname}:${http_port}`;
+            const redirectUrl = new URL(req.url, `https://${host.replace(http_port, https_port)}`);
+            return res.redirect(301, redirectUrl.toString());
         }
         next();
-    });
+    }) as express.RequestHandler);
 
-    http.createServer(httpApp).listen(http_port, hostname, () => {
+    http.createServer(httpApp).listen({
+        port     : http_port,
+        hostname : hostname,
+    }, () => {
         console.log(`HTTP redirect server running at http://${hostname}:${http_port}`);
     });
 } else {
-    http.createServer(app).listen(http_port, hostname, () => {
+    http.createServer(app).listen({
+        port     : http_port,
+        hostname : hostname,
+    }, () => {
         console.log(`HTTP server running at http://${hostname}:${http_port}`);
     });
 }

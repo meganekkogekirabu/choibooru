@@ -1,9 +1,9 @@
 // FIXME: needs i18n
 
-import * as database from "./database.js";
+import * as database from "./database.ts";
 import bcrypt from "bcryptjs";
 
-export async function create_user(username, password) {
+export async function create_user(username: string, password: string) {
     if (username.length > 20 || password.length > 20) {
         return {
             response : "Username or password is too long.",
@@ -32,7 +32,7 @@ export async function create_user(username, password) {
     };
 }
 
-export async function sign_in(username, password) {
+export async function sign_in(username: string, password: string) {
     const row = await database.get(`
         SELECT * FROM users WHERE username = ?;
     `, [username]);
@@ -73,7 +73,7 @@ export async function sign_in(username, password) {
     }
 }
 
-export async function new_api_key(user_id) {
+export async function new_api_key(user_id: bigint) {
     if (!user_id) {
         return {
             response : "new_api_key did not receive user ID",

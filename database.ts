@@ -5,7 +5,7 @@ import { dirname, join } from "node:path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-export async function run(sql, params = []) {
+export async function run(sql: string, params: any[] = []) {
     const db = await open({
         filename : join(__dirname, "booru.db"),
         driver   : sqlite3.Database,
@@ -16,7 +16,7 @@ export async function run(sql, params = []) {
     return result;
 };
 
-export async function get(sql, params = []) {
+export async function get(sql: string, params: any[] = []) {
     const db = await open({
         filename : join(__dirname, "booru.db"),
         driver   : sqlite3.Database,
@@ -27,7 +27,7 @@ export async function get(sql, params = []) {
     return result;
 };
 
-export async function all(sql, params = []) {
+export async function all(sql: string, params: any[] = []) {
     const db = await open({
         filename : join(__dirname, "booru.db"),
         driver   : sqlite3.Database,
