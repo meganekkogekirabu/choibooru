@@ -1,6 +1,6 @@
 # choibooru
 
-This is an imageboard system similar to Danbooru or Gelbooru written primarily in JavaScript.
+This is an imageboard system similar to Danbooru or Gelbooru written primarily in JavaScript and TypeScript.
 
 
 ## Setup
