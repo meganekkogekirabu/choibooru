@@ -4,16 +4,17 @@ declare module "express-session" {
     interface SessionData {
         lang?     : string,
         username? : string,
-        is_admin  : boolean,
-        is_full   : boolean,
-        user_id   : bigint,
+        is_admin? : boolean,
+        is_full?  : boolean,
+        user_id?  : number,
     }
 }
 
 declare module "./user.ts" {
     export interface BasicResponse {
-        response : string;
         status   : number;
+        response?: string;
+        error?   : string;
     }
 
     export interface CreateUserResponse extends BasicResponse {}
@@ -23,17 +24,19 @@ declare module "./user.ts" {
         is_admin : boolean;
         user_id  : number;
         is_full  : boolean;
-        status   : 200;
     }
 
     export interface SignInFailureResponse extends BasicResponse {
-        status : 403;
+        username? : string;
+        is_admin? : boolean;
+        user_id?  : number;
+        is_full?  : boolean;
     }
 
     export type SignInResponse = SignInSuccessResponse | SignInFailureResponse;
 
     export interface NewApiKeyResponse extends BasicResponse {
-        key?    : string;
+        key? : string;
     }
 
     export function create_user(username: string, password: string): Promise<CreateUserResponse>;
@@ -45,12 +48,16 @@ declare module "./user.ts" {
 
 declare module "./posts.ts" {
     export interface Post {
-        id?      : number;
+        id       : number;
         src      : string;
         uploader : string;
         date     : number;
+        score    : number;
+        voters   : string;
+        tags     : string;
         rating   : string;
-        deleted  : 0 | 1;
+        deleted  : number;
+        source?  : string;
     }
 
     /**
@@ -73,9 +80,8 @@ declare module "database" {
      * Result object returned by sqlite's run() method.
      */
     export interface RunResult {
-        lastID?: number;
-        changes?: number;
-        [key: string]: any;
+        lastID? : number;
+        changes : number;
     }
 
     /**

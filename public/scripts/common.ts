@@ -1,12 +1,43 @@
-class i18n_service {
+interface Translations {
+    [key: string] : string;
+}
+
+interface Post {
+    id       : number;
+    src      : string;
+    uploader : string;
+    date     : number;
+    score    : number;
+    voters   : string;
+    tags     : string;
+    rating   : string;
+    deleted  : number;
+    source?  : string;
+}
+
+interface PostData {
+    tag    : string;
+    offset : number;
+    limit  : number;
+    total  : number;
+    error? : string;
+}
+
+class I18nService {
+    public translations: Translations;
+    public current_lang: string;
+
     constructor() {
         this.translations = {};
         this.current_lang = "en";
     }
 
-    async load_translations() {
+    async load_translations(): Promise<void> {
         try {
-            const lang = await fetch("/api/lang").then(response => response.json()).then(data => data.lang);
+            const langResponse = await fetch("/api/lang");
+            const langData = await langResponse.json();
+            const lang = langData.lang;
+            
             const response = await fetch(`/api/translations?lang=${lang}`);
             this.translations = await response.json();
             this.current_lang = lang;
@@ -16,14 +47,13 @@ class i18n_service {
         }
     }
 
-    t(key, params) {
+    t(key: string, params?: string): string {
         let translation = this.translations[key] || key;
 
         if (params) {
-            params = JSON.parse(params);
-
-            for (const [k, v] of Object.entries(params)) {
-                translation = translation.replace(`{${k}}`, v);
+            const parsedParams = JSON.parse(params);
+            for (const [k, v] of Object.entries(parsedParams)) {
+                translation = translation.replace(`{${k}}`, String(v));
             }
         }
 
@@ -31,22 +61,25 @@ class i18n_service {
     }
 }
 
-const i18n = new i18n_service;
+const i18n = new I18nService();
 
-const tr = i18n.load_translations().then(async () => {
+export const tr = i18n.load_translations().then(async () => {
     return await i18n.translations;
 });
 
-async function add_posts(data) {
+async function add_posts(data: PostData): Promise<void> {
     const t = await tr;
     const posts = document.getElementById("posts");
+    if (!posts) return;
+
     let current = 1;
     let current_search_tag = data.tag || "";
     
     const chunk = 14;
-    const total = Math.ceil(data.total / chunk);
+    const total = Math.ceil((data.total as number || 0) / chunk);
     
-    function display(page) {
+    function display(page: number): void {
+        if (!posts) return;
         posts.innerHTML = "";
         current = page;
         
@@ -64,9 +97,7 @@ async function add_posts(data) {
                     limit  : chunk
                 }),
             })
-
             .then(response => response.json())
-
             .then(page_data => render_posts(page_data));
         } else {
             fetch(`/api/posts?offset=${start}&limit=${chunk}`)
@@ -75,7 +106,8 @@ async function add_posts(data) {
         }
     }
 
-    function render_posts(page_data) {
+    function render_posts(page_data: Post[]): void {
+        if (!posts) return;
         for (const post of page_data) {
             const figure = document.createElement("figure");
             figure.classList.add("post");
@@ -87,13 +119,13 @@ async function add_posts(data) {
             });
 
             if (post.rating === "explicit") {
-                img.style["border-color"] = "#F16";
+                img.style.borderColor = "#F16";
                 img.title = "explicit";
             }
 
             const subtitle = document.createElement("figcaption");
             subtitle.textContent = "#" + post.id;
-            subtitle.style["font-size"] = "13px";
+            subtitle.style.fontSize = "13px";
 
             const date = document.createElement("span");
             date.style.float = "right";
@@ -105,12 +137,15 @@ async function add_posts(data) {
             posts.appendChild(figure);
         }
 
-        document.getElementById("sidebar").innerHTML = "";
+        const sidebar = document.getElementById("sidebar");
+        if (sidebar) sidebar.innerHTML = "";
         update();
     }
 
-    function update() {
-        document.getElementById("pagination")?.remove();
+    function update(): void {
+        if (!posts) return;
+        const existingPagination = document.getElementById("pagination");
+        if (existingPagination) existingPagination.remove();
 
         const pagination = document.createElement("div");
         pagination.id = "pagination";
@@ -144,7 +179,7 @@ async function add_posts(data) {
 
         for (let i = start_page; i <= end_page; i++) {
             const page_button = document.createElement("button");
-            page_button.textContent = i;
+            page_button.textContent = i.toString();
             if (i === current) {
                 page_button.style.fontWeight = "bold";
                 page_button.disabled = true;
@@ -174,24 +209,30 @@ async function add_posts(data) {
     }
 }
 
-function load_translations() {
+function load_translations(): void {
     i18n.load_translations().then(() => {
         document.querySelectorAll('[data-i18n]').forEach(el => {
-            el.innerHTML = i18n.t(el.dataset.i18n, el.dataset.i18nParams);
-            el.lang = i18n.current_lang;
+            if (el instanceof HTMLElement) {
+                el.innerHTML = i18n.t(el.dataset.i18n || "", el.dataset.i18nParams);
+                el.lang = i18n.current_lang;
+            }
         });
 
         if (i18n.current_lang !== "en") {
             const footer_right = document.getElementById("footer-right");
-            const move_en = document.createElement("p");
-            move_en.innerHTML = "English";
-            move_en.style.cursor = "pointer";
+            if (footer_right) {
+                const move_en = document.createElement("p");
+                move_en.innerHTML = "English";
+                move_en.style.cursor = "pointer";
 
-            move_en.addEventListener("click", () => {
-                window.location.href = window.location.href.replace(/(?<=^http:\/\/)[^.]+\./, "")
-            });
+                move_en.addEventListener("click", () => {
+                    window.location.href = window.location.href.replace(/(?<=^http:\/\/)[^.]+\./, "");
+                });
 
-            footer_right.appendChild(move_en);
+                footer_right.appendChild(move_en);
+            }
         }
     });
 }
+
+export { add_posts, load_translations, i18n }; 
