@@ -3,23 +3,11 @@
 MODE=${1:-dev}
 ENV=".$MODE.env"
 
-OK="\e[32mOK      =>\e[0m"
-WARNING="\e[33mWARNING =>\e[0m"
-ERROR="\e[31mERROR   =>\e[0m"
-NOTICE="NOTICE  =>"
-INDENT="        =>"
+source bin/common.sh
+log_to_file "logs/init.sh.log"
 
-mkdir -p logs
-echo -e "$NOTICE logging to logs/init.sh.log"
-exec > >(tee ./logs/init.sh.log) 2>&1
-
-bail() {
-    local status_code=${1:-0}
-    sleep 5
-    exit "$status_code"
-}
-
-# must be updated along with the dependencies list in init.sh
+# update along with the list in init.sh
+# dependencies used in this file should throw an error
 declare -A dependencies=(
     ["openssl"]="error"
     ["sqlite3"]="error"
@@ -27,25 +15,8 @@ declare -A dependencies=(
     ["npm"]="error"
 )
 
-missing=()
-
-for dep in "${!dependencies[@]}"; do
-    if ! command -v "$dep" &>/dev/null; then
-        if [[ "${dependencies[$dep]}" == "error" ]]; then
-            missing+=("$dep")
-        else
-            echo -e "$WARNING missing (optional for this script) dependency $dep"
-        fi
-    fi
-done
-
-if [[ ${#missing[@]} -gt 0 ]]; then
-    echo -e "$ERROR missing the following required dependencies, exiting:"
-    for dep in "${missing[@]}"; do
-        echo -e "$INDENT $dep"
-    done
-    bail 1
-fi
+check_dependencies dependencies
+check_assets
 
 if [ -f "$ENV" ]; then
     source "$ENV"
@@ -59,29 +30,17 @@ if [ -f "$ENV" ]; then
     fi
 fi
 
-echo -e "$OK installing dependencies"
-npm install --silent
-mkdir -p public/assets/posts
-mkdir -p keys
-
-declare -a assets=(
-    "public/assets/logo.png"
-    "public/assets/404.png"
-    "public/assets/posts/deleted.png"
-    "public/assets/favicon.ico"
-)
-
-for asset in "${assets[@]}"
-do
-    [ ! -f "$asset" ] && echo -e "$WARNING couldn't find $asset, make sure you add it"
-done
-
 if [ ! -f "booru.db" ]; then
     sqlite3 booru.db < init.sql
     echo -e "$OK initialised SQL database"
 fi
 
 if [ ! -f "$ENV" ]; then
+    echo -e "$OK installing dependencies"
+    npm install --silent
+    mkdir -p public/assets/posts
+    mkdir -p keys
+    
     cat > "$ENV" <<EOF
 SESSION_KEY=""
 HTTP_HOSTNAME=""

@@ -10,7 +10,6 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         *)
-            # assume any other argument is the mode
             MODE="$1"
             shift
             ;;
@@ -19,49 +18,19 @@ done
 
 ENV=".$MODE.env"
 
-OK="\e[32mOK      =>\e[0m"
-WARNING="\e[33mWARNING =>\e[0m"
-ERROR="\e[31mERROR   =>\e[0m"
-NOTICE="NOTICE  =>"
-INDENT="        =>"
+source bin/common.sh
+log_to_file "logs/start.sh.log"
 
-mkdir -p logs
-echo -e "$NOTICE logging to logs/start.sh.log"
-exec > >(tee ./logs/start.sh.log) 2>&1
-
-bail() {
-    local status_code=${1:-0}
-    sleep 5
-    exit "$status_code"
-}
-
-# must be updated along with the dependencies list in init.sh
+# update along with the list in start.sh
+# dependencies used in this file should throw an error
 declare -A dependencies=(
     ["openssl"]="warning"
     ["sqlite3"]="warning"
     ["node"]="error"
     ["npm"]="error"
 )
-
-missing=()
-
-for dep in "${!dependencies[@]}"; do
-    if ! command -v "$dep" &>/dev/null; then
-        if [[ "${dependencies[$dep]}" == "error" ]]; then
-            missing+=("$dep")
-        else
-            echo -e "$WARNING missing (optional for this script) dependency $dep"
-        fi
-    fi
-done
-
-if [[ ${#missing[@]} -gt 0 ]]; then
-    echo -e "$ERROR missing the following required dependencies, exiting:"
-    for dep in "${missing[@]}"; do
-        echo -e "$INDENT $dep"
-    done
-    bail 1
-fi
+check_dependencies dependencies
+check_assets
 
 if [ ! -f "$ENV" ]; then
     echo -e "$ERROR this installation has not been initialised with init.sh, exiting..."
@@ -109,18 +78,6 @@ printf "%b\n" "$(cat <<EOF
 \e[0m
 EOF
 )"
-
-declare -a assets=(
-    "public/assets/logo.png"
-    "public/assets/404.png"
-    "public/assets/posts/deleted.png"
-    "public/assets/favicon.ico"
-)
-
-for asset in "${assets[@]}"
-do
-    [ ! -f "$asset" ] && echo -e "$WARNING couldn't find $asset, make sure you add it"
-done
 
 echo -e "$OK checking dependencies"
 npm install --silent
