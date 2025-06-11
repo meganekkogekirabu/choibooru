@@ -48,6 +48,7 @@ check_assets() {
         "public/assets/404.png"
         "public/assets/posts/deleted.png"
         "public/assets/favicon.ico"
+        "public/assets/gulim.ttf"
     )
     for asset in "${assets[@]}"; do
         [ ! -f "$asset" ] && echo -e "$WARNING couldn't find $asset, make sure you add it"
