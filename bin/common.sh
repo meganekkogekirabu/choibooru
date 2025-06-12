@@ -9,7 +9,7 @@ NOTICE="NOTICE  =>"
 INDENT="        =>"
 
 log_to_file() {
-    mkdir -p logs
+    mkdir -p bin/logs
     echo -e "$NOTICE logging to $1"
     exec > >(tee "$1") 2>&1
 }
