@@ -4,7 +4,7 @@ MODE=${1:-dev}
 ENV=".$MODE.env"
 
 source bin/common.sh
-log_to_file "logs/init.sh.log"
+log_to_file "bin/logs/init.sh.log"
 
 # update along with the list in init.sh
 # dependencies used in this file should throw an error

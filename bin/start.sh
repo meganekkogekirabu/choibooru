@@ -19,7 +19,7 @@ done
 ENV=".$MODE.env"
 
 source bin/common.sh
-log_to_file "logs/start.sh.log"
+log_to_file "bin/logs/start.sh.log"
 
 # update along with the list in start.sh
 # dependencies used in this file should throw an error
