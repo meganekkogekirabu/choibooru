@@ -19,7 +19,7 @@ chmod +x bin/init.sh
 bin/init.sh
 ```
 
-init.sh can be run either for development mode, creating .dev.env, with `./init.sh` or `./init.sh dev`, or in production mode, creatoing .prod.env, with `./init.sh prod`.
+init.sh can be run either for development mode, creating .dev.env, with `./init.sh` or `./init.sh dev`, or in production mode, creating .prod.env, with `./init.sh prod`.
 
 The first time running the script will give a message like ".dev/prod.env created with default configuration." The file created will need to be populated with the environment variables necessary to run the server:
 
