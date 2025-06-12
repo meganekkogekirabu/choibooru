@@ -13,6 +13,7 @@ declare -A dependencies=(
     ["sqlite3"]="error"
     ["node"]="warning"
     ["npm"]="error"
+    ["tsc"]="warning"
 )
 
 check_dependencies dependencies

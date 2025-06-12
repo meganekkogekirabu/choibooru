@@ -28,6 +28,7 @@ declare -A dependencies=(
     ["sqlite3"]="warning"
     ["node"]="error"
     ["npm"]="error"
+    ["tsc"]="error"
 )
 check_dependencies dependencies
 check_assets
